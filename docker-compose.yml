@@ -3,7 +3,7 @@ version: '2'
 services:
   # Define a InfluxDB service
   influxdb:
-    image: influxdb:latest
+    image: influxdb:1.7
     container_name: influxdb
     ports:
       - "8083:8083"
@@ -19,7 +19,7 @@ services:
   # Define a service for using the influx CLI tool.
   # docker-compose -p smartplug run influxdb-cli
   influxdb-cli:
-    image: influxdb:latest
+    image: influxdb:1.7
     container_name: influxdb-cli
     entrypoint:
       - influx
@@ -32,7 +32,7 @@ services:
 
   # Define a Chronograf service
   chronograf:
-    image: chronograf:latest
+    image: chronograf:1.7
     container_name: chronograf
     volumes:
       - ./chronograf/data:/var/lib/chronograf
@@ -46,7 +46,7 @@ services:
 
   # Define a Grafana service
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:5.4.3
     container_name: grafana
     ports:
       - "3000:3000"
@@ -61,7 +61,7 @@ services:
 
   # # Define a Telegraf service (demo metrics on docker container CPU and RAM usage, to remove)
   # telegraf:
-  #   image: telegraf:latest
+  #   image: telegraf:1.9
   #   container_name: telegraf
   #   depends_on:
   #     - influxdb
