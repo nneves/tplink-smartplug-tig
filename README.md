@@ -1,0 +1,1 @@
+# TP-Link HS110 Smart Wi-Fi Plug Energy Monitoring System using TIG Stack [Telegraf-InfluxDB-Grafana]
