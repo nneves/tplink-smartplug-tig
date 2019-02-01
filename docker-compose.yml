@@ -70,6 +70,22 @@ services:
   #   networks:
   #     - smartplug-network
 
+  smartdetect:
+    image: smartdetect
+    build:
+      context: .
+      dockerfile: Dockerfile.smartdetect
+    container_name: smartdetect
+    environment:
+      NETWORK_IP_START_OCTET: "100"
+      NETWORK_IP_END_OCTET: "150"
+    depends_on:
+      - influxdb
+    # volumes:
+    #   - ./telegraf/conf/telegraf-smartplug.conf:/etc/telegraf/telegraf.conf:ro
+    networks:
+      - smartplug-network
+
 networks:
   smartplug-network:
     driver: bridge

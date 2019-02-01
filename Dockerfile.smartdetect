@@ -1,0 +1,31 @@
+# use telegraf base image to use docker image cache
+FROM buildpack-deps:stretch-curl
+
+RUN mkdir /work
+WORKDIR /work
+
+RUN apt-get update --assume-yes && apt-get install -y \
+    netcat \
+    git \
+    jq \
+    python2.7 \
+    curl \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN ln -s /usr/bin/python2.7 /usr/bin/python
+RUN ln -s /usr/bin/python2.7 /usr/bin/python2
+
+# copy python tplink-smartplug tool
+RUN git clone https://github.com/softScheck/tplink-smartplug.git /work/tplink-smartplug
+RUN ln -s /work/tplink-smartplug/tplink_smartplug.py /usr/bin/tplink_smartplug
+RUN chmod u+x /usr/bin/tplink_smartplug
+
+RUN mkdir /work/scripts
+# init script
+ADD ./smartdetect/init.sh /work/scripts/init.sh
+RUN chmod u+x /work/scripts/init.sh
+# tplink-autodetect
+ADD ./smartdetect/tplink-autodetect.sh /work/scripts/tplink-autodetect.sh
+RUN chmod u+x /work/scripts/tplink-autodetect.sh
+
+CMD ["/work/scripts/init.sh"]

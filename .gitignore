@@ -1,3 +1,4 @@
 influxdb/data
 grafana/data
 chronograf/data
+smartdetect/*.log
