@@ -76,9 +76,9 @@ services:
       context: .
       dockerfile: Dockerfile.smartdetect
     container_name: smartdetect
-    environment:
-      NETWORK_IP_START_OCTET: "100"
-      NETWORK_IP_END_OCTET: "150"
+    # environment:
+    #   NETWORK_IP_START_OCTET: "1"
+    #   NETWORK_IP_END_OCTET: "254"
     depends_on:
       - influxdb
     # volumes:
