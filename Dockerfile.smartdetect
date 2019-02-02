@@ -2,6 +2,7 @@
 FROM buildpack-deps:stretch-curl
 
 RUN mkdir /work
+RUN mkdir /work/data
 WORKDIR /work
 
 RUN apt-get update --assume-yes && apt-get install -y \
@@ -10,6 +11,7 @@ RUN apt-get update --assume-yes && apt-get install -y \
     jq \
     python2.7 \
     curl \
+    nano \
  && rm -rf /var/lib/apt/lists/*
 
 RUN ln -s /usr/bin/python2.7 /usr/bin/python

@@ -16,19 +16,19 @@ services:
     networks:
       - smartplug-network
 
-  # Define a service for using the influx CLI tool.
-  # docker-compose -p smartplug run influxdb-cli
-  influxdb-cli:
-    image: influxdb:1.7
-    container_name: influxdb-cli
-    entrypoint:
-      - influx
-      - -host
-      - influxdb
-    depends_on:
-      - influxdb
-    networks:
-      - smartplug-network
+  # # Define a service for using the influx CLI tool.
+  # # docker-compose -p smartplug run influxdb-cli
+  # influxdb-cli:
+  #   image: influxdb:1.7
+  #   container_name: influxdb-cli
+  #   entrypoint:
+  #     - influx
+  #     - -host
+  #     - influxdb
+  #   depends_on:
+  #     - influxdb
+  #   networks:
+  #     - smartplug-network
 
   # Define a Chronograf service
   chronograf:
@@ -76,13 +76,15 @@ services:
       context: .
       dockerfile: Dockerfile.smartdetect
     container_name: smartdetect
-    # environment:
-    #   NETWORK_IP_START_OCTET: "1"
-    #   NETWORK_IP_END_OCTET: "254"
+    environment:
+      SCAN_INTERVAL: 30
+      NETWORK_IP_ADDRESS: "192.168.1.0/24"
+      NETWORK_IP_START_OCTET: "1"
+      NETWORK_IP_END_OCTET: "254"
+    volumes:
+      - ./smartdetect/data/:/work/data
     depends_on:
       - influxdb
-    # volumes:
-    #   - ./telegraf/conf/telegraf-smartplug.conf:/etc/telegraf/telegraf.conf:ro
     networks:
       - smartplug-network
 
