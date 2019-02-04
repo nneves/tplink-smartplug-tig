@@ -18,8 +18,9 @@ services:
   telegraf-smartplug-0:
     container_name: telegraf-smartplug-0
     environment:
+      STR_DEVICE_INTERVAL: "5s"
       STR_DEVICE_NAME: "Room Heater"
-      STR_DEVICE_IP: "192.168.1.104"
+      STR_DEVICE_IP: "192.168.1.111"
       STR_DEVICE_MAC: "AC:84:C6:3B:A0:CA"
     <<: *smartplug-function
 
@@ -27,7 +28,8 @@ services:
   telegraf-smartplug-1:
     container_name: telegraf-smartplug-1
     environment:
-      STR_DEVICE_NAME: "SevenPlug1"
+      STR_DEVICE_INTERVAL: "5s"
+      STR_DEVICE_NAME: "Fridge"
       STR_DEVICE_IP: "192.168.1.105"
       STR_DEVICE_MAC: "AC:84:C6:89:EA:44"
     <<: *smartplug-function
@@ -36,8 +38,9 @@ services:
   telegraf-smartplug-2:
     container_name: telegraf-smartplug-2
     environment:
-      STR_DEVICE_NAME: "SevenPlug2"
-      STR_DEVICE_IP: "192.168.1.106"
+      STR_DEVICE_INTERVAL: "5s"
+      STR_DEVICE_NAME: "Water Heater"
+      STR_DEVICE_IP: "192.168.1.118"
       STR_DEVICE_MAC: "AC:84:C6:59:D2:A3"
     <<: *smartplug-function
 
