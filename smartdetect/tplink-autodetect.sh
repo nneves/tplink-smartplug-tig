@@ -67,7 +67,15 @@ cat ./probelist.log | {
   printf "\e[32mProbe tplink_smartplug completed!\n\e[39m\n";
 }
 
-touch $FILEDATA;
+# checks if file exists, creates if not
+if [ -f "$FILEDATA" ]
+then
+    echo "$FILEDATA already exists!";
+else
+    echo "$FILEDATA does not exist, create empty file!";
+    touch $FILEDATA;
+fi
+
 cat ./devicelist.log | grep . | {
   while IFS= read -r device
   do
