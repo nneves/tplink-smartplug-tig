@@ -15,7 +15,7 @@ x-function: &smartplug-function
     - smartplug-network
 
 services:
-  # SIGNATURE: [AC:84:C6:3B:A0:CA|192.168.1.104|Room Heater|telegraf-smartplug-0]
+  # SIGNATURE: [AC:84:C6:3B:A0:CA|192.168.1.111|Room Heater|telegraf-smartplug-0]
   telegraf-smartplug-0:
     container_name: telegraf-smartplug-0
     environment:
@@ -25,7 +25,7 @@ services:
       STR_DEVICE_MAC: "AC:84:C6:3B:A0:CA"
     <<: *smartplug-function
 
-  # SIGNATURE: [AC:84:C6:89:EA:44|192.168.1.105|SevenPlug1|telegraf-smartplug-1]
+  # SIGNATURE: [AC:84:C6:89:EA:44|192.168.1.105|Fridge|telegraf-smartplug-1]
   telegraf-smartplug-1:
     container_name: telegraf-smartplug-1
     environment:
@@ -35,13 +35,13 @@ services:
       STR_DEVICE_MAC: "AC:84:C6:89:EA:44"
     <<: *smartplug-function
 
-  # SIGNATURE: [AC:84:C6:59:D2:A3|192.168.1.106|SevenPlug2|telegraf-smartplug-2]
+  # SIGNATURE: [AC:84:C6:59:D2:A3|192.168.1.116|Water Heater|telegraf-smartplug-2]
   telegraf-smartplug-2:
     container_name: telegraf-smartplug-2
     environment:
       STR_DEVICE_INTERVAL: "5s"
       STR_DEVICE_NAME: "Water Heater"
-      STR_DEVICE_IP: "192.168.1.118"
+      STR_DEVICE_IP: "192.168.1.116"
       STR_DEVICE_MAC: "AC:84:C6:59:D2:A3"
     <<: *smartplug-function
 
