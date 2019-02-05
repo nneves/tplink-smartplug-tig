@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# can
+# scan
 SCAN_INTERVAL="${SCAN_INTERVAL:-250}"
 
 while true;

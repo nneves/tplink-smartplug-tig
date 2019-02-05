@@ -3,7 +3,8 @@ FROM telegraf:1.9
 RUN mkdir /work
 WORKDIR /work
 
-RUN apt-get update --assume-yes && apt-get install -y \
+RUN apt-get update --assume-yes && apt-get install apt-transport-https -y \
+    ca-certificates \
     git \
     jq \
     python2.7 \

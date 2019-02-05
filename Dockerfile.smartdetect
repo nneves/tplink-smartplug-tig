@@ -5,7 +5,8 @@ RUN mkdir /work
 RUN mkdir /work/data
 WORKDIR /work
 
-RUN apt-get update --assume-yes && apt-get install -y \
+RUN apt-get update --assume-yes && apt-get install apt-transport-https -y \
+    ca-certificates \
     netcat \
     git \
     jq \
