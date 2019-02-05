@@ -6,6 +6,7 @@ x-function: &smartplug-function
   build:
     context: .
     dockerfile: Dockerfile.smartplug
+  restart: always
   depends_on:
     - influxdb
   volumes:
