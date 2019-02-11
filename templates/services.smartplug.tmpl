@@ -1,0 +1,9 @@
+  # SIGNATURE: [$DEVICE_MAC|$DEVICE_IP|$DEVICE_NAME|telegraf-smartplug-$DEVICE_NUMBER]
+  telegraf-smartplug-$DEVICE_NUMBER:
+    container_name: telegraf-smartplug-$DEVICE_NUMBER
+    environment:
+      STR_DEVICE_INTERVAL: "$DEVICE_INTERVAL"
+      STR_DEVICE_NAME: "$DEVICE_NAME"
+      STR_DEVICE_IP: "$DEVICE_IP"
+      STR_DEVICE_MAC: "$DEVICE_MAC"
+    <<: *smartplug-function

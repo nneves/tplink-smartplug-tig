@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./smartscheduler/init.sh
+./smartscheduler/init.sh;

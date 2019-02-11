@@ -1,0 +1,22 @@
+version: '2'
+
+# Basic function options
+x-function: &smartplug-function
+  image: telegraf-smartplug
+  build:
+    context: .
+    dockerfile: Dockerfile.smartplug
+  restart: always
+  depends_on:
+    - influxdb
+  volumes:
+    - ./telegraf/conf/telegraf-smartplug.conf:/etc/telegraf/telegraf.conf:ro
+  networks:
+    - smartplug-network
+
+services:
+# <SERVICES.SMARTPLUG.TMPL>
+
+networks:
+  smartplug-network:
+    driver: bridge
