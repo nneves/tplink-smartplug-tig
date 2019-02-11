@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 IP_ADDRESS="${NETWORK_IP_ADDRESS:-"192.168.1.0/24"}";
 START_IP="${NETWORK_IP_START_OCTET:-1}";
@@ -54,6 +54,13 @@ echo "" > ./devicelist.log;
 cat ./probelist.log | {
   while IFS= read -r device
   do
+    # check if probelist IP address is already present in the device.list (if so, skips detection)
+    if [ "$device" = "$(cat $FILEDATA | cut -d '|' -f 2 | grep -Ev '^$' | grep $device)" ]
+    then
+      echo "Found ACTIVE $device in $FILEDATA, skip 'tplink_smartplug' INFO request.";
+      continue;
+    fi;
+
     # launch command in parallel
     tplink_smartplug -t $device -c info \
       | grep "Received" \
@@ -104,4 +111,4 @@ cat ./devicelist.log | grep . | {
 
   done;
 }
-# --------------------------------------------------------------------------
+exit 0;
