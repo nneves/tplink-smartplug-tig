@@ -32,7 +32,7 @@ function render_docker_compose_smartplug()
             fi;
             local DEVICE_NUMBER="$COUNTER";
             local DEVICE_INTERVAL="$SERVICES_INTERVAL";
-            local DEVICE_NAME="$(echo $device | cut -d '|' -f 3);"
+            local DEVICE_NAME="$(echo $device | cut -d '|' -f 3)";
             local DEVICE_IP="$(echo $device | cut -d '|' -f 2)";
             local DEVICE_MAC="$(echo $device | cut -d '|' -f 1)";
 
