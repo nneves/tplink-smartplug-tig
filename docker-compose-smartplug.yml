@@ -1,50 +1,5 @@
 version: '2'
 
-# Basic function options
-x-function: &smartplug-function
-  image: telegraf-smartplug
-  build:
-    context: .
-    dockerfile: Dockerfile.smartplug
-  restart: always
-  depends_on:
-    - influxdb
-  volumes:
-    - ./telegraf/conf/telegraf-smartplug.conf:/etc/telegraf/telegraf.conf:ro
-  networks:
-    - smartplug-network
-
-services:
-  # SIGNATURE: [AC:84:C6:3B:A0:CA|192.168.1.111|Room Heater|telegraf-smartplug-0]
-  telegraf-smartplug-0:
-    container_name: telegraf-smartplug-0
-    environment:
-      STR_DEVICE_INTERVAL: "5s"
-      STR_DEVICE_NAME: "Room Heater"
-      STR_DEVICE_IP: "192.168.1.111"
-      STR_DEVICE_MAC: "AC:84:C6:3B:A0:CA"
-    <<: *smartplug-function
-
-  # SIGNATURE: [AC:84:C6:89:EA:44|192.168.1.105|Fridge|telegraf-smartplug-1]
-  telegraf-smartplug-1:
-    container_name: telegraf-smartplug-1
-    environment:
-      STR_DEVICE_INTERVAL: "5s"
-      STR_DEVICE_NAME: "Fridge"
-      STR_DEVICE_IP: "192.168.1.105"
-      STR_DEVICE_MAC: "AC:84:C6:89:EA:44"
-    <<: *smartplug-function
-
-  # SIGNATURE: [AC:84:C6:59:D2:A3|192.168.1.116|Water Heater|telegraf-smartplug-2]
-  telegraf-smartplug-2:
-    container_name: telegraf-smartplug-2
-    environment:
-      STR_DEVICE_INTERVAL: "5s"
-      STR_DEVICE_NAME: "Water Heater"
-      STR_DEVICE_IP: "192.168.1.116"
-      STR_DEVICE_MAC: "AC:84:C6:59:D2:A3"
-    <<: *smartplug-function
-
 networks:
   smartplug-network:
     driver: bridge
