@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./smartscheduler/init.sh;
+SERVICES_INTERVAL="5s" ./smartscheduler/init.sh;
