@@ -19,7 +19,7 @@ RUN ln -s /work/tplink-smartplug/tplink_smartplug.py /usr/bin/tplink_smartplug
 RUN chmod u+x /usr/bin/tplink_smartplug
 
 RUN echo '#!/bin/sh\n \
-tplink_smartplug -t $1 -c energy | grep "Received" | sed -e "s/  */ /g" | sed -e "s/Received: //g"\n' \
+tplink_smartplug -t $1 -j "{\"system\":{\"get_sysinfo\":null},\"emeter\":{\"get_realtime\":{}}}" | grep "Received" | sed -e "s/  */ /g" | sed -e "s/Received: //g"\n' \
 > /work/smartplug_energy
 RUN chmod u+x /work/smartplug_energy
 
