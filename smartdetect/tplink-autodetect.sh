@@ -5,6 +5,21 @@ START_IP="${NETWORK_IP_START_OCTET:-1}";
 END_IP="${NETWORK_IP_END_OCTET:-254}";
 FILEDATA="/work/data/device.list";
 
+# --------------------------------------------------------------------------
+# functions
+# --------------------------------------------------------------------------
+function send_slack_message() {
+    if [ -n "${SLACK_WEBHOOK_URL}" ]
+    then
+      echo "=> Slack Message: $1";
+      curl -s -S -X POST -H 'Content-type: application/json' --data "{\"text\":\"$1\"}" $SLACK_WEBHOOK_URL &
+    fi
+}
+# --------------------------------------------------------------------------
+
+# --------------------------------------------------------------------------
+# MAIN
+# --------------------------------------------------------------------------
 printf "\e[36m#------------------------------------------------------------\e[39m\n";
 printf "\e[36mTP-LINK HS110 Smart Wi-Fi Plug With Energy Monitoring\e[39m\n";
 printf "\e[36m#------------------------------------------------------------\e[39m\n";
@@ -104,6 +119,7 @@ cat ./devicelist.log | grep . | {
       printf "\e[33mUnable to find device SIGNATURE in $FILEDATA.\n\e[39m";
       printf "\e[33mUpdating file with new device!\n\e[39m";
       echo "$devicemac|$deviceip|$devicealias|$deviceinfo" >> $FILEDATA;
+      send_slack_message "Found new smartplug device:\n$devicemac\t$deviceip\t$devicealias";
       printf "\e[33m#------------------------------------------------------------\e[39m\n";
       cat $FILEDATA;
       printf "\e[33m#------------------------------------------------------------\e[39m\n";

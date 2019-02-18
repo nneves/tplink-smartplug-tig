@@ -1,5 +1,7 @@
+.env
 influxdb/data
 grafana/data
 chronograf/data
 smartdetect/data
 smartdetect/*.log
+
