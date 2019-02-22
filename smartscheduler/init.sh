@@ -6,23 +6,23 @@
 # TODO: smartdetect should not touch device.list file or else it will trigger fswatch event!
 # TODO: save init.sh PID into file and fork the process in the smartplug-start.sh
 # TODO: smartplug-stop.sh to stop the init.sh from previous saved PID file
-# DONE: generate telegraf-smartplug file from template
+# DONE: generate datacolector file from template
 # TODO: smartdetect will clear device.list when launching for the first time
 
 SERVICES_INTERVAL="${SERVICES_INTERVAL:-5s}"
 DEVICE_LIST_PATH="./smartdetect/data/device.list";
-DOCKER_COMPOSE_SMARTPLUG_PATH="./templates/docker-compose.smartplug.tmpl";
-SERVICES_SMARTPLUG_PATH="./templates/services.smartplug.sh";
+DOCKER_COMPOSE_DATACOLECTOR_PATH="./templates/docker-compose-datacolector.yml";
+GENERATE_DATACOLECTOR_SERVICE_PATH="./templates/docker-compose-service.sh";
 
 # ------------------------------------------------------------
 # functions
 # ------------------------------------------------------------
-function render_docker_compose_smartplug()
+function render_docker_compose_datacolector()
 {
-    # main loop, render SERVICES_SMARTPLUG_PARTIAL
+    # main loop, render DATACOLECTOR_SERVICES_PARTIAL
     local COUNTER=0;
-    local SERVICES_SMARTPLUG='';
-    local SERVICES_SMARTPLUG_RENDERED='';
+    local DATACOLECTOR_SERVICES='';
+    local DATACOLECTOR_SERVICES_RENDERED='';
 
     cat $DEVICE_LIST_PATH | {
         while IFS= read -r device
@@ -36,40 +36,43 @@ function render_docker_compose_smartplug()
             local DEVICE_IP="$(echo $device | cut -d '|' -f 2)";
             local DEVICE_MAC="$(echo $device | cut -d '|' -f 1)";
 
-            local SERVICES_SMARTPLUG_PARTIAL=$($SERVICES_SMARTPLUG_PATH $DEVICE_NUMBER $DEVICE_INTERVAL "$DEVICE_NAME" $DEVICE_IP $DEVICE_MAC);
-            SERVICES_SMARTPLUG=$(printf "${SERVICES_SMARTPLUG}\n${SERVICES_SMARTPLUG_PARTIAL}\n");
+            local DATACOLECTOR_SERVICES_PARTIAL=$($GENERATE_DATACOLECTOR_SERVICE_PATH $DEVICE_NUMBER $DEVICE_INTERVAL "$DEVICE_NAME" $DEVICE_IP $DEVICE_MAC);
+            DATACOLECTOR_SERVICES=$(printf "${DATACOLECTOR_SERVICES}\n${DATACOLECTOR_SERVICES_PARTIAL}\n");
             COUNTER=$((COUNTER+1));
         done;
-        # check if COUNTER=0, renders a default valid empty docker-compose-smartplug.yml
+        # check if COUNTER=0, renders a default valid empty docker-compose-datacolector.yml
         if [[ "$COUNTER" = "0" ]]
         then
             printf "version: '2'\n\nnetworks:\n  smartplug-network:\n    driver: bridge\n";
         else
-            # replace docker-compose.smartplug.tmpl
-            local ESCAPED=$(echo "${SERVICES_SMARTPLUG}" | sed '$!s@$@\\@g');
-            SERVICES_SMARTPLUG_RENDERED=$(sed "s/# <SERVICES.SMARTPLUG.TMPL>/# <SERVICES.SMARTPLUG.TMPL>${ESCAPED}/g" $DOCKER_COMPOSE_SMARTPLUG_PATH);
-            echo "$SERVICES_SMARTPLUG_RENDERED";
+            # replace docker-compose-datacolector.yml
+            local ESCAPED=$(echo "${DATACOLECTOR_SERVICES}" | sed '$!s@$@\\@g');
+            DATACOLECTOR_SERVICES_RENDERED=$(sed "s/# <SERVICES.SMARTPLUG.TMPL>/# <SERVICES.SMARTPLUG.TMPL>${ESCAPED}/g" $DOCKER_COMPOSE_DATACOLECTOR_PATH);
+            echo "$DATACOLECTOR_SERVICES_RENDERED";
         fi;
     }
 }
 
-function generate_docker_compose_smartplug()
+function generate_docker_compose_datacolector()
 {
-    # Create telegraf-smartplug docker-compose file from 'smartdetect/data/device.list'
-    echo "Create telegraf-smartplug docker-compose file from template with new device.list data";
-    SERVICES_SMARTPLUG_RENDERED=$(render_docker_compose_smartplug);
-    echo "$SERVICES_SMARTPLUG_RENDERED" > docker-compose-smartplug.yml;
-    cat docker-compose-smartplug.yml;
+    # Create datacolector docker-compose file from 'smartdetect/data/device.list'
+    echo "-------------------------------------------------------------------------------";
+    echo "Create datacolector docker-compose file from template with new device.list data";
+    echo "-------------------------------------------------------------------------------";
+    DATACOLECTOR_SERVICES_RENDERED=$(render_docker_compose_datacolector);
+    echo "$DATACOLECTOR_SERVICES_RENDERED" > docker-compose-datacolector.yml;
+    cat docker-compose-datacolector.yml;
+    echo "-------------------------------------------------------------------------------";
 }
 
 # ------------------------------------------------------------
 # main
 # ------------------------------------------------------------
-# Create telegraf-smartplug docker-compose file from 'smartdetect/data/device.list'
-generate_docker_compose_smartplug;
+# Create datacolector docker-compose file from 'smartdetect/data/device.list'
+generate_docker_compose_datacolector;
 
-echo "Start telegraf-smartplug docker containers.";
-docker-compose -p smartplug -f docker-compose.yml -f docker-compose-smartplug.yml up -d;
+echo "Start datacolector docker containers.";
+docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml up -d;
 
 # watch for device.list modifications
 fswatch -0 smartdetect/data/device.list | {
@@ -77,17 +80,17 @@ fswatch -0 smartdetect/data/device.list | {
         echo "EVENT => ${event}";
         echo $path$file modified;
 
-        echo "Stop telegraf-smartplug docker containers...";
-        CONTAINER_LIST=$(docker ps --filter "name=telegraf-smartplug" --format "{{.Names}}");
-        echo "$CONTAINER_LIST" | xargs -I {} docker-compose -p smartplug -f docker-compose.yml -f docker-compose-smartplug.yml stop {};
-        echo "$CONTAINER_LIST" | xargs -I {} docker-compose -p smartplug -f docker-compose.yml -f docker-compose-smartplug.yml rm -f {};
+        echo "Stop datacolector docker containers...";
+        CONTAINER_LIST=$(docker ps --filter "name=datacolector" --format "{{.Names}}");
+        echo "$CONTAINER_LIST" | xargs -I {} docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml stop {};
+        echo "$CONTAINER_LIST" | xargs -I {} docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml rm -f {};
         echo "$CONTAINER_LIST";
 
-        # Create telegraf-smartplug docker-compose file from 'smartdetect/data/device.list'
-        generate_docker_compose_smartplug;
+        # Create datacolector docker-compose file from 'smartdetect/data/device.list'
+        generate_docker_compose_datacolector;
 
-        echo "Start telegraf-smartplug new docker containers.";
-        docker-compose -p smartplug -f docker-compose.yml -f docker-compose-smartplug.yml up -d;
+        echo "Start datacolector new docker containers.";
+        docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml up -d;
     done;
 }
 exit 0;

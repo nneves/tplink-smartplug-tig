@@ -25,10 +25,10 @@ RUN chmod u+x /usr/bin/tplink_smartplug
 
 RUN mkdir /work/scripts
 # init script
-ADD ./smartdetect/init.sh /work/scripts/init.sh
+ADD ./init.sh /work/scripts/init.sh
 RUN chmod u+x /work/scripts/init.sh
 # tplink-autodetect
-ADD ./smartdetect/tplink-autodetect.sh /work/scripts/tplink-autodetect.sh
+ADD ./tplink-autodetect.sh /work/scripts/tplink-autodetect.sh
 RUN chmod u+x /work/scripts/tplink-autodetect.sh
 
 CMD ["/work/scripts/init.sh"]

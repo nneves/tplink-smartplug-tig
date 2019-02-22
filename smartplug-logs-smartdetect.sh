@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker-compose -p smartplug -f docker-compose.yml -f docker-compose-smartplug.yml logs -f smartdetect
+docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml logs -f smartdetect

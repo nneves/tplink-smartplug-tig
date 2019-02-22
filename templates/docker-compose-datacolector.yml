@@ -1,16 +1,16 @@
 version: '2'
 
 # Basic function options
-x-function: &smartplug-function
-  image: telegraf-smartplug
+x-function: &datacolector-function
+  image: datacolector
   build:
-    context: .
-    dockerfile: Dockerfile.smartplug
+    context: ./datacolector
+    dockerfile: Dockerfile
   restart: always
   depends_on:
     - influxdb
   volumes:
-    - ./telegraf/conf/telegraf-smartplug.conf:/etc/telegraf/telegraf.conf:ro
+    - ./datacolector/conf/telegraf-smartplug.conf:/etc/telegraf/telegraf.conf:ro
   networks:
     - smartplug-network
 

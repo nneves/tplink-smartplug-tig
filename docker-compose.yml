@@ -65,8 +65,8 @@ services:
   smartdetect:
     image: smartdetect
     build:
-      context: .
-      dockerfile: Dockerfile.smartdetect
+      context: ./smartdetect
+      dockerfile: Dockerfile
     container_name: smartdetect
     restart: always
     environment:

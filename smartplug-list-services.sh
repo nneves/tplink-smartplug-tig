@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker-compose -p smartplug -f docker-compose.yml -f docker-compose-smartplug.yml ps
+docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml ps

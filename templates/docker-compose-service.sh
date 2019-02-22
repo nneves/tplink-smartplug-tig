@@ -15,7 +15,7 @@ then
   # running from project root folder, need to add '/templates' to SCRIPT_PATH
   SCRIPT_PATH="$SCRIPT_PATH/templates";
 fi
-SERVICES_SMARTPLUG_TMPL_PATH="$SCRIPT_PATH/services.smartplug.tmpl";
+DOCKER_COMPOSE_SERVICE_PATH="$SCRIPT_PATH/docker-compose-service.yml";
 
 # --------------------------------------------------------------------------
 # check if not arguments are set, prints help
@@ -36,20 +36,20 @@ DEVICE_IP="$4";
 DEVICE_MAC="$5";
 
 # --------------------------------------------------------------------------
-# parse service.smartplug.tmpl
+# parse docker-compose-service.yml
 # --------------------------------------------------------------------------
-SERVICES_SMARTPLUG_TMPL=`cat ${SERVICES_SMARTPLUG_TMPL_PATH}`;
-SERVICES_SMARTPLUG_YML=$(eval "echo \"${SERVICES_SMARTPLUG_TMPL}\"");
+DOCKER_COMPOSE_SERVICE_TMPL=`cat ${DOCKER_COMPOSE_SERVICE_PATH}`;
+DOCKER_COMPOSE_SERVICE_YML=$(eval "echo \"${DOCKER_COMPOSE_SERVICE_TMPL}\"");
 if [[ $? != "0" ]]
 then
-    echo "Failed to parse 'service.smartplug.tmpl' data!";
+    echo "Failed to parse 'docker-compose-service.yml' data!";
     exit $RETURN_ERROR;
 fi
 
 # --------------------------------------------------------------------------
 # return parsed result
 # --------------------------------------------------------------------------
-echo "$SERVICES_SMARTPLUG_YML";
+echo "$DOCKER_COMPOSE_SERVICE_YML";
 
 exit $RETURN_SUCCESS;
 # --------------------------------------------------------------------------
