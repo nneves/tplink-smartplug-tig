@@ -9,6 +9,6 @@ do
     /work/scripts/tplink-autodetect.sh;
     end=`date +%s`;
     runtime=$((end-start));
-    echo "Autodetect scan took $runtime seconds, next iteration starts in $SCAN_INTERVAL seconds ...\n";
+    echo "Autodetect scan took $runtime seconds, next iteration starts in $SCAN_INTERVAL seconds ...";
     sleep $SCAN_INTERVAL;
 done;

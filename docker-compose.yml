@@ -31,20 +31,20 @@ services:
   #   networks:
   #     - smartplug-network
 
-  # Define a Chronograf service
-  chronograf:
-    image: chronograf:1.7
-    container_name: chronograf
-    restart: always
-    volumes:
-      - ./chronograf/data:/var/lib/chronograf
-    ports:
-      - "8888:8888"
-    command: "chronograf --influxdb-url=http://influxdb:8086"
-    depends_on:
-      - influxdb
-    networks:
-      - smartplug-network
+  # # Define a Chronograf service
+  # chronograf:
+  #   image: chronograf:1.7
+  #   container_name: chronograf
+  #   restart: always
+  #   volumes:
+  #     - ./chronograf/data:/var/lib/chronograf
+  #   ports:
+  #     - "8888:8888"
+  #   command: "chronograf --influxdb-url=http://influxdb:8086"
+  #   depends_on:
+  #     - influxdb
+  #   networks:
+  #     - smartplug-network
 
   # Define a Grafana service
   grafana:
@@ -69,6 +69,24 @@ services:
       dockerfile: Dockerfile
     container_name: smartscheduler
     restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - "$PWD:/$PWD"
+    working_dir: "$PWD"
+    networks:
+      - smartplug-network
+
+  smartmonitor:
+    image: smartmonitor
+    build:
+      context: ./smartmonitor
+      dockerfile: Dockerfile
+    container_name: smartmonitor
+    restart: always
+    environment:
+      SCAN_INTERVAL: 30
+    env_file:
+      - .env
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - "$PWD:/$PWD"

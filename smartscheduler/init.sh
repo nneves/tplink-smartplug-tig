@@ -1,13 +1,7 @@
 #!/bin/bash
 
-# NOTE: requires `brew install fswatch`
-# https://github.com/emcrisostomo/fswatch
-
 # TODO: smartdetect should not touch device.list file or else it will trigger fswatch event!
-# TODO: save init.sh PID into file and fork the process in the smartplug-start.sh
-# TODO: smartplug-stop.sh to stop the init.sh from previous saved PID file
-# DONE: generate datacolector file from template
-# TODO: smartdetect will clear device.list when launching for the first time
+# TODO: send slack message when starting and stopping the system
 
 SERVICES_INTERVAL="${SERVICES_INTERVAL:-5s}"
 DEVICE_LIST_PATH="./smartdetect/data/device.list";

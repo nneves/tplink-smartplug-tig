@@ -119,7 +119,7 @@ cat ./devicelist.log | grep . | {
       printf "\e[33mUnable to find device SIGNATURE in $FILEDATA.\n\e[39m";
       printf "\e[33mUpdating file with new device!\n\e[39m";
       echo "$devicemac|$deviceip|$devicealias|$deviceinfo" >> $FILEDATA;
-      send_slack_message "Found new smartplug device:\n$devicemac\t$deviceip\t$devicealias";
+      send_slack_message "*Found new smartplug device:*\n$devicemac\t$deviceip\t$devicealias";
       printf "\e[33m#------------------------------------------------------------\e[39m\n";
       cat $FILEDATA;
       printf "\e[33m#------------------------------------------------------------\e[39m\n";
