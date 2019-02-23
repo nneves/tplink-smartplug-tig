@@ -1,3 +1,3 @@
 #!/bin/bash
 
-SERVICES_INTERVAL="5s" ./smartscheduler/init.sh;
+docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml up -d

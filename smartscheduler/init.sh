@@ -71,8 +71,8 @@ function generate_docker_compose_datacolector()
 # Create datacolector docker-compose file from 'smartdetect/data/device.list'
 generate_docker_compose_datacolector;
 
-echo "Start datacolector docker containers.";
-docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml up -d;
+# echo "Start datacolector docker containers.";
+# docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml up -d;
 
 echo "Start monitoring 'smartdetect/data/device.list'";
 # watch for device.list modifications
@@ -91,7 +91,9 @@ fswatch -m poll_monitor -0 smartdetect/data/device.list | {
         generate_docker_compose_datacolector;
 
         echo "Start datacolector new docker containers.";
-        docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml up -d;
+        # docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml start;
+        cat docker-compose-datacolector.yml | grep "SIGNATURE:" | sed -e "s/\[//g" | sed -e "s/\]//g" | cut -d "|" -f 4 | \
+            xargs -I {} docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml up -d {};
     done;
 }
 exit 0;
