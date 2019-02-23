@@ -43,7 +43,7 @@ function render_docker_compose_datacolector()
         # check if COUNTER=0, renders a default valid empty docker-compose-datacolector.yml
         if [[ "$COUNTER" = "0" ]]
         then
-            printf "version: '2'\n\nnetworks:\n  smartplug-network:\n    driver: bridge\n";
+            printf "version: '2.2'\n\nnetworks:\n  smartplug-network:\n    driver: bridge\n";
         else
             # replace docker-compose-datacolector.yml
             local ESCAPED=$(echo "${DATACOLECTOR_SERVICES}" | sed '$!s@$@\\@g');
