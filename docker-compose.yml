@@ -1,4 +1,4 @@
-version: '2'
+version: '2.2'
 
 services:
   # Define a InfluxDB service
@@ -59,6 +59,20 @@ services:
       - influxdb
     volumes:
       - ./grafana/data:/var/lib/grafana
+    networks:
+      - smartplug-network
+
+  smartscheduler:
+    image: smartscheduler
+    build:
+      context: ./smartscheduler
+      dockerfile: Dockerfile
+    container_name: smartscheduler
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - "$PWD:/$PWD"
+    working_dir: "$PWD"
     networks:
       - smartplug-network
 

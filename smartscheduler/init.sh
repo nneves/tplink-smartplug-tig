@@ -74,8 +74,9 @@ generate_docker_compose_datacolector;
 echo "Start datacolector docker containers.";
 docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml up -d;
 
+echo "Start monitoring 'smartdetect/data/device.list'";
 # watch for device.list modifications
-fswatch -0 smartdetect/data/device.list | {
+fswatch -m poll_monitor -0 smartdetect/data/device.list | {
     while read -d "" event; do
         echo "EVENT => ${event}";
         echo $path$file modified;
