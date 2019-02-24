@@ -4,15 +4,9 @@ ERROR_MESSAGE="did not complete within its interval";
 DEVICE_LIST_PATH="./smartdetect/data/device.list";
 
 # --------------------------------------------------------------------------
-# functions
+# load scripts
 # --------------------------------------------------------------------------
-function send_slack_message() {
-    if [ -n "${SLACK_WEBHOOK_URL}" ]
-    then
-      echo "=> Slack Message: $1";
-      curl -s -S -X POST -H 'Content-type: application/json' --data "{\"text\":\"$1\"}" $SLACK_WEBHOOK_URL &
-    fi
-}
+source ./scripts/send_slack_message.sh;
 # --------------------------------------------------------------------------
 
 # --------------------------------------------------------------------------
@@ -44,7 +38,9 @@ do
                 DEVICE_LINE=$(cat $DEVICE_LIST_PATH | grep -n "$DEVICE_METADATA" | grep -Eo '^[^:]+');
                 echo "DEVICE_LINE=$DEVICE_LINE";
                 sed -i -e "${DEVICE_LINE}d" $DEVICE_LIST_PATH;
-                send_slack_message "*Remove device due to read response errors:* $COUNT\n$( echo $DEVICE_METADATA | sed -e "s/\[//g" | sed -e "s/\]//g" | sed -e "s/|/\\t/g")";
+                send_slack_message "Remove device due to read response errors: $COUNT" \
+                    "$(echo $DEVICE_METADATA | sed -e "s/\[//g" | sed -e "s/\]//g" | sed -e "s/|/\\t/g")" \
+                    $MESSAGE_COLOR_YELLOW;
             fi;
         done;
     }

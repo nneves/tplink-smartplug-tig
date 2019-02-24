@@ -27,6 +27,9 @@ RUN mkdir /work/scripts
 # init script
 ADD ./init.sh /work/scripts/init.sh
 RUN chmod u+x /work/scripts/init.sh
+# helper script
+ADD ./scripts/send_slack_message.sh /work/scripts/send_slack_message.sh
+RUN chmod u+x /work/scripts/send_slack_message.sh
 # tplink-autodetect
 ADD ./tplink-autodetect.sh /work/scripts/tplink-autodetect.sh
 RUN chmod u+x /work/scripts/tplink-autodetect.sh

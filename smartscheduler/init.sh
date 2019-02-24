@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # TODO: smartdetect should not touch device.list file or else it will trigger fswatch event!
-# TODO: send slack message when starting and stopping the system
 
 SERVICES_INTERVAL="${SERVICES_INTERVAL:-5s}"
 DEVICE_LIST_PATH="./smartdetect/data/device.list";
