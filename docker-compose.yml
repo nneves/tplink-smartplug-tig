@@ -68,6 +68,8 @@ services:
       context: ./smartscheduler
       dockerfile: Dockerfile
     container_name: smartscheduler
+    environment:
+      SERVICES_INTERVAL: 3s
     restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
