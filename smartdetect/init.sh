@@ -15,6 +15,9 @@ IP_ADDRESS="${NETWORK_IP_ADDRESS:-"192.168.1.0/24"}";
 START_IP="${NETWORK_IP_START_OCTET:-1}";
 END_IP="${NETWORK_IP_END_OCTET:-254}";
 FILEDATA="./smartdetect/data/device.list";
+IPLIST="./scripts/logs/iplist.log";
+PROBELIST="./scripts/logs/probelist.log";
+DEVICELIST="./scripts/logs/devicelist.log";
 
 SCAN_INTERVAL="${SCAN_INTERVAL:-250}"
 
@@ -30,7 +33,7 @@ while true;
 do
     start=`date +%s`;
     # list all network ip addresses and send probe command in parallel
-    echo "" > ./iplist.log;
+    echo "" > $IPLIST;
     count=$START_IP;
     ip=$(echo $IP_ADDRESS | sed 's/0\/24/'$count'/g');
     printf "\e[33mNETWORK_IP_ADDRESS: $IP_ADDRESS\n\e[39m";
@@ -45,7 +48,7 @@ do
     [ $((count%50)) -eq 0 ] && printf "\n";
 
     ### launch command in parallel
-    nc -zvn $ip 9999 >> ./iplist.log 2>&1 & pid=$!;
+    nc -zvn $ip 9999 >> $IPLIST 2>&1 & pid=$!;
     PID_LIST1="$PID_LIST1 $pid";
     count=$(( $count + 1 ));
     done;
@@ -57,15 +60,15 @@ do
     printf "\e[32mProbe scanning completed!\e[39m\n";
 
     # process positive response from probe
-    cat iplist.log \
+    cat $IPLIST \
     | grep "succeeded\|open" \
-    | awk '{match($0,/[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/); ip = substr($0,RSTART,RLENGTH);  print ip}' > probelist.log;
+    | awk '{match($0,/[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/); ip = substr($0,RSTART,RLENGTH);  print ip}' > $PROBELIST;
     printf "\e[32mProbe ip list\e[39m\n";
-    cat ./probelist.log
+    cat $PROBELIST;
 
     # run tplink_smartplug.py on each probe ip to check if it's a valid smartplug
-    echo "" > ./devicelist.log;
-    cat ./probelist.log | {
+    echo "" > $DEVICELIST;
+    cat $PROBELIST | {
     while IFS= read -r device
     do
         ### check if probelist IP address is already present in the device.list (if so, skips detection)
@@ -78,7 +81,7 @@ do
         docker run --rm datacolector /usr/bin/tplink_smartplug -t $device -c info \
         | grep "Received" \
         | sed -e "s/  */ /g" \
-        | sed -e "s/Received: /"$device"|/g" >> ./devicelist.log 2>&1 & pid=$!;
+        | sed -e "s/Received: /"$device"|/g" >> $DEVICELIST 2>&1 & pid=$!;
         PID_LIST2="$PID_LIST2 $pid";
     done;
 
@@ -96,7 +99,7 @@ do
         touch $FILEDATA;
     fi
 
-    cat ./devicelist.log | grep . | {
+    cat $DEVICELIST | grep . | {
     while IFS= read -r device
     do
         deviceip=`echo $device | cut -d '|' -f 1`;
