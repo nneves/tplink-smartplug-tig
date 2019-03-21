@@ -13,7 +13,7 @@ SCRIPT_PATH="$PWD";
 if [[ $(echo "$SCRIPT_PATH" | tr "/" "\n" | tail -n 1) != "templates" ]]
 then
   # running from project root folder, need to add '/templates' to SCRIPT_PATH
-  SCRIPT_PATH="$SCRIPT_PATH/templates";
+  SCRIPT_PATH="$SCRIPT_PATH/scripts/templates";
 fi
 DOCKER_COMPOSE_SERVICE_PATH="$SCRIPT_PATH/docker-compose-service.yml";
 

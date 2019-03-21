@@ -1,11 +1,9 @@
-#!/bin/bash
-
-# TODO: smartdetect should not touch device.list file or else it will trigger fswatch event!
+#/bin/bash
 
 SERVICES_INTERVAL="${SERVICES_INTERVAL:-5s}"
 DEVICE_LIST_PATH="./smartdetect/data/device.list";
-DOCKER_COMPOSE_DATACOLECTOR_PATH="./templates/docker-compose-datacolector.yml";
-GENERATE_DATACOLECTOR_SERVICE_PATH="./templates/docker-compose-service.sh";
+DOCKER_COMPOSE_DATACOLECTOR_PATH="./scripts/templates/docker-compose-datacolector.yml";
+GENERATE_DATACOLECTOR_SERVICE_PATH="./scripts/templates/docker-compose-service.sh";
 
 # ------------------------------------------------------------
 # functions
@@ -21,9 +19,9 @@ function render_docker_compose_datacolector()
         while IFS= read -r device
         do
             if [[ -z "$device" ]]; then
-            continue;
+                continue;
             fi;
-            local DEVICE_NUMBER="$COUNTER";
+            local DEVICE_NUMBER="$(echo $device | cut -d '|' -f 2 | cut -d '.' -f 4)";
             local DEVICE_INTERVAL="$SERVICES_INTERVAL";
             local DEVICE_NAME="$(echo $device | cut -d '|' -f 3)";
             local DEVICE_IP="$(echo $device | cut -d '|' -f 2)";
@@ -57,36 +55,3 @@ function generate_docker_compose_datacolector()
     cat docker-compose-datacolector.yml;
     echo "-------------------------------------------------------------------------------";
 }
-
-# ------------------------------------------------------------
-# main
-# ------------------------------------------------------------
-# Create datacolector docker-compose file from 'smartdetect/data/device.list'
-generate_docker_compose_datacolector;
-
-# echo "Start datacolector docker containers.";
-# docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml up -d;
-
-echo "Start monitoring 'smartdetect/data/device.list'";
-# watch for device.list modifications
-fswatch -m poll_monitor -0 smartdetect/data/device.list | {
-    while read -d "" event; do
-        echo "EVENT => ${event}";
-        echo $path$file modified;
-
-        echo "Stop datacolector docker containers...";
-        CONTAINER_LIST=$(docker ps --filter "name=datacolector" --format "{{.Names}}");
-        echo "$CONTAINER_LIST" | xargs -I {} docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml stop {};
-        echo "$CONTAINER_LIST" | xargs -I {} docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml rm -f {};
-        echo "$CONTAINER_LIST";
-
-        # Create datacolector docker-compose file from 'smartdetect/data/device.list'
-        generate_docker_compose_datacolector;
-
-        echo "Start datacolector new docker containers.";
-        # docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml start;
-        cat docker-compose-datacolector.yml | grep "SIGNATURE:" | sed -e "s/\[//g" | sed -e "s/\]//g" | cut -d "|" -f 4 | \
-            xargs -I {} docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml up -d {};
-    done;
-}
-exit 0;

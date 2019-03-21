@@ -62,59 +62,6 @@ services:
     networks:
       - smartplug-network
 
-  smartscheduler:
-    image: smartscheduler
-    build:
-      context: ./smartscheduler
-      dockerfile: Dockerfile
-    container_name: smartscheduler
-    environment:
-      SERVICES_INTERVAL: 3s
-    restart: always
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - "$PWD:/$PWD"
-    working_dir: "$PWD"
-    networks:
-      - smartplug-network
-
-  smartmonitor:
-    image: smartmonitor
-    build:
-      context: ./smartmonitor
-      dockerfile: Dockerfile
-    container_name: smartmonitor
-    restart: always
-    environment:
-      SCAN_INTERVAL: 30
-    env_file:
-      - .env
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - "$PWD:/$PWD"
-    working_dir: "$PWD"
-    networks:
-      - smartplug-network
-
-  smartdetect:
-    image: smartdetect
-    build:
-      context: ./smartdetect
-      dockerfile: Dockerfile
-    container_name: smartdetect
-    restart: always
-    environment:
-      SCAN_INTERVAL: 30
-      NETWORK_IP_ADDRESS: "192.168.1.0/24"
-      NETWORK_IP_START_OCTET: "1"
-      NETWORK_IP_END_OCTET: "254"
-    env_file:
-      - .env
-    volumes:
-      - ./smartdetect/data/:/work/data
-    networks:
-      - smartplug-network
-
 networks:
   smartplug-network:
     driver: bridge

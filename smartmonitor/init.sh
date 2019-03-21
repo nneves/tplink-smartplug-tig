@@ -1,12 +1,17 @@
 #!/bin/bash
-SCAN_INTERVAL="${SCAN_INTERVAL:-250}"
+SCAN_INTERVAL="${SCAN_INTERVAL:-10}"
 ERROR_MESSAGE="did not complete within its interval";
 DEVICE_LIST_PATH="./smartdetect/data/device.list";
 
 # --------------------------------------------------------------------------
-# load scripts
+# load env vars and scripts
 # --------------------------------------------------------------------------
+if [ -f .env ]
+then
+    source .env;
+fi
 source ./scripts/send_slack_message.sh;
+source ./scripts/generate_docker_compose_datacolector.sh;
 # --------------------------------------------------------------------------
 
 # --------------------------------------------------------------------------
@@ -38,6 +43,7 @@ do
                 DEVICE_LINE=$(cat $DEVICE_LIST_PATH | grep -n "$DEVICE_METADATA" | grep -Eo '^[^:]+');
                 echo "DEVICE_LINE=$DEVICE_LINE";
                 sed -i -e "${DEVICE_LINE}d" $DEVICE_LIST_PATH;
+                generate_docker_compose_datacolector;
                 send_slack_message "Remove device due to read response errors: $COUNT" \
                     "$(echo $DEVICE_METADATA | sed -e "s/\[//g" | sed -e "s/\]//g" | sed -e "s/|/\\t/g")" \
                     $MESSAGE_COLOR_YELLOW;
