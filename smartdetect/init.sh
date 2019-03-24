@@ -21,6 +21,8 @@ DEVICELIST="./scripts/logs/devicelist.log";
 
 SCAN_INTERVAL="${SCAN_INTERVAL:-250}"
 
+NC_TIMEOUT="${NC_TIMEOUT:-30}"
+
 # --------------------------------------------------------------------------
 # main
 # --------------------------------------------------------------------------
@@ -48,7 +50,8 @@ do
     [ $((count%50)) -eq 0 ] && printf "\n";
 
     ### launch command in parallel
-    nc -zvn $ip 9999 >> $IPLIST 2>&1 & pid=$!;
+    nc -zvn $ip 9999 >> $IPLIST 2>&1 &
+    pid=$!;
     PID_LIST1="$PID_LIST1 $pid";
     count=$(( $count + 1 ));
     done;
@@ -56,38 +59,42 @@ do
     printf "\e[33m\n$ip\n[END]\e[39m\n";
 
     printf "\e[36mWaiting for probe scanning ...\e[39m\n";
-    wait $PID_LIST1
+    sleep $NC_TIMEOUT;
+    kill -9 $PID_LIST1;
+    PID_LIST1="";
     printf "\e[32mProbe scanning completed!\e[39m\n";
 
     # process positive response from probe
     cat $IPLIST \
-    | grep "succeeded\|open" \
-    | awk '{match($0,/[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/); ip = substr($0,RSTART,RLENGTH);  print ip}' > $PROBELIST;
+        | grep "succeeded\|open" \
+        | awk '{match($0,/[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/); ip = substr($0,RSTART,RLENGTH);  print ip}' > $PROBELIST;
     printf "\e[32mProbe ip list\e[39m\n";
     cat $PROBELIST;
 
     # run tplink_smartplug.py on each probe ip to check if it's a valid smartplug
     echo "" > $DEVICELIST;
     cat $PROBELIST | {
-    while IFS= read -r device
-    do
-        ### check if probelist IP address is already present in the device.list (if so, skips detection)
-        if [ "$device" = "$(cat $FILEDATA | cut -d '|' -f 2 | grep -Ev '^$' | grep $device)" ]
-        then
-        echo "Found ACTIVE $device in $FILEDATA, skip 'tplink_smartplug' INFO request.";
-        continue;
-        fi;
-        ### launch command in parallel
-        docker run --rm datacolector /usr/bin/tplink_smartplug -t $device -c info \
-        | grep "Received" \
-        | sed -e "s/  */ /g" \
-        | sed -e "s/Received: /"$device"|/g" >> $DEVICELIST 2>&1 & pid=$!;
-        PID_LIST2="$PID_LIST2 $pid";
-    done;
+        while IFS= read -r device
+        do
+            ### check if probelist IP address is already present in the device.list (if so, skips detection)
+            if [ "$device" = "$(cat $FILEDATA | cut -d '|' -f 2 | grep -Ev '^$' | grep $device)" ]
+            then
+                echo "Found ACTIVE $device in $FILEDATA, skip 'tplink_smartplug' INFO request.";
+                continue;
+            fi;
+            ### launch command in parallel
+            docker run --rm datacolector /usr/bin/tplink_smartplug -t $device -c info \
+                | grep "Received" \
+                | sed -e "s/  */ /g" \
+                | sed -e "s/Received: /"$device"|/g" >> $DEVICELIST 2>&1 &
+            pid=$!;
+            PID_LIST2="$PID_LIST2 $pid";
+        done;
 
-    printf "\e[36mWaiting for tplink_smartplug response ...\e[39m\n";
-    wait $PID_LIST2
-    printf "\e[32mProbe tplink_smartplug completed!\n\e[39m\n";
+        printf "\e[36mWaiting for tplink_smartplug response ...\e[39m\n";
+        wait $PID_LIST2;
+        PID_LIST2="";
+        printf "\e[32mProbe tplink_smartplug completed!\n\e[39m\n";
     }
 
     # checks if file exists, creates if not
@@ -100,43 +107,43 @@ do
     fi
 
     cat $DEVICELIST | grep . | {
-    while IFS= read -r device
-    do
-        deviceip=`echo $device | cut -d '|' -f 1`;
-        deviceinfo=`echo $device | cut -d '|' -f 2`;
-        devicemac=`echo $deviceinfo | jq '.system.get_sysinfo.mac' | sed -e "s/\"//g"`;
-        devicealias=`echo $deviceinfo | jq '.system.get_sysinfo.alias' | sed -e "s/\"//g"`;
-        printf "\e[36m#------------------------------------------------------------\e[39m\n";
-        printf "\e[36m$deviceip\e[39m\n";
-        printf "\e[36m#------------------------------------------------------------\e[39m\n";
-        echo "$deviceinfo" | jq .;
-        printf "\e[36m#------------------------------------------------------------\e[39m\n\n";
+        while IFS= read -r device
+        do
+            deviceip=`echo $device | cut -d '|' -f 1`;
+            deviceinfo=`echo $device | cut -d '|' -f 2`;
+            devicemac=`echo $deviceinfo | jq '.system.get_sysinfo.mac' | sed -e "s/\"//g"`;
+            devicealias=`echo $deviceinfo | jq '.system.get_sysinfo.alias' | sed -e "s/\"//g"`;
+            printf "\e[36m#------------------------------------------------------------\e[39m\n";
+            printf "\e[36mDEVICEMAC=$devicemac\e[39m\n";
+            printf "\e[36mDEVICEIP=$deviceip\e[39m\n";
+            printf "\e[36mDEVICEALIAS=$devicealias\e[39m\n";
+            printf "\e[36m#------------------------------------------------------------\e[39m\n";
+            echo "$deviceinfo" | jq .;
+            printf "\e[36m#------------------------------------------------------------\e[39m\n\n";
 
-        # verify if device signature exists in $FILEDATA => AC:84:C6:89:EA:44|192.168.1.105|SevenPlug1|<DEVICEINFO>
-        result=$( cat $FILEDATA | grep "$devicemac|$deviceip|$devicealias" );
-        if [ "$?" != "0" ]
-        then
-        printf "\e[33m#------------------------------------------------------------\e[39m\n";
-        printf "\e[33mUnable to find device SIGNATURE in $FILEDATA.\n\e[39m";
-        printf "\e[33mUpdating file with new device!\n\e[39m";
-        echo "$devicemac|$deviceip|$devicealias|$deviceinfo" >> $FILEDATA;
-        # TODO: generate template for datacolector
-        generate_docker_compose_datacolector;
-        DATACOLECTOR=$(cat docker-compose-datacolector.yml \
-                | grep "# SIGNATURE" \
-                | sed -e 's/# SIGNATURE://g' \
-                | sed -e 's/]//g' \
-                | sed -e 's/]//g' \
-                | cut -d '|' -f 4 \
-                | grep "$devicemac|$deviceip|$devicealias|$deviceinfo");
-        docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml up -d;
-        send_slack_message "Found new smartplug device:" "$devicemac\t$deviceip\t$devicealias" $MESSAGE_COLOR_BLUE;
-        printf "\e[33m#------------------------------------------------------------\e[39m\n";
-        cat $FILEDATA;
-        printf "\e[33m#------------------------------------------------------------\e[39m\n";
-        fi;
+            # verify if device signature exists in $FILEDATA => AC:84:C6:89:EA:44|192.168.1.105|SevenPlug1|<DEVICEINFO>
+            result=$( cat $FILEDATA | grep "$devicemac|$deviceip|$devicealias" );
+            if [ "$?" != "0" ]
+            then
+                printf "\e[33m#------------------------------------------------------------\e[39m\n";
+                printf "\e[33mUnable to find device SIGNATURE in $FILEDATA.\n\e[39m";
+                printf "\e[33mUpdating file with new device!\n\e[39m";
+                echo "$devicemac|$deviceip|$devicealias|$deviceinfo" >> $FILEDATA;
+                generate_docker_compose_datacolector;
+                DATACOLECTOR=$(cat docker-compose-datacolector.yml \
+                        | grep "# SIGNATURE" \
+                        | sed -e 's/# SIGNATURE://g' \
+                        | sed -e 's/]//g' \
+                        | sed -e 's/]//g' \
+                        | grep "$devicemac|$deviceip|$devicealias" \
+                        | cut -d '|' -f 4);
+                printf "\e[33mLaunch docker container for: $DATACOLECTOR!\n\e[39m";
+                docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml up -d $DATACOLECTOR;
+                send_slack_message "Found new smartplug device:" "$devicemac\t$deviceip\t$devicealias" $MESSAGE_COLOR_BLUE;
+                printf "\e[33m#------------------------------------------------------------\e[39m\n";
+            fi;
 
-    done;
+        done;
     }
     end=`date +%s`;
     runtime=$((end-start));

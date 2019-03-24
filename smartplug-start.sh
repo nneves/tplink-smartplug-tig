@@ -19,7 +19,7 @@ generate_docker_compose_datacolector;
 # launch all services
 docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml up -d
 # launch scripts
-./smartdetect/init.sh > ./scripts/logs/smartdetect.log 2>&1 &
+SCAN_INTERVAL=30 NC_TIMEOUT=15 NETWORK_IP_START_OCTET=1 NETWORK_IP_END_OCTET=254 ./smartdetect/init.sh > ./scripts/logs/smartdetect.log 2>&1 &
 JOB_PID=$!;
 echo "$JOB_PID" > ./scripts/pids/smartdetect.pid;
 echo "Launched script: smartdetect";
