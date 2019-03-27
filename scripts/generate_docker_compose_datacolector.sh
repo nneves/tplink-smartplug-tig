@@ -55,3 +55,54 @@ function generate_docker_compose_datacolector()
     cat docker-compose-datacolector.yml;
     echo "-------------------------------------------------------------------------------";
 }
+
+function render_docker_compose_datacolector_sample()
+{
+    # render DATACOLECTOR_SERVICES_PARTIAL
+    local DATACOLECTOR_SERVICES='';
+    local DATACOLECTOR_SERVICES_RENDERED='';
+
+    local DEVICE_NUMBER="0";
+    local DEVICE_INTERVAL="$SERVICES_INTERVAL";
+    local DEVICE_NAME="sample";
+    local DEVICE_IP="127.0.0.1";
+    local DEVICE_MAC="11:22:33:44:55:66";
+
+    local DATACOLECTOR_SERVICES_PARTIAL=$($GENERATE_DATACOLECTOR_SERVICE_PATH $DEVICE_NUMBER $DEVICE_INTERVAL "$DEVICE_NAME" $DEVICE_IP $DEVICE_MAC);
+    DATACOLECTOR_SERVICES=$(printf "${DATACOLECTOR_SERVICES}\n${DATACOLECTOR_SERVICES_PARTIAL}\n");
+
+    # replace docker-compose-datacolector.yml
+    local ESCAPED=$(echo "${DATACOLECTOR_SERVICES}" | sed '$!s@$@\\@g');
+    DATACOLECTOR_SERVICES_RENDERED=$(sed "s/# <SERVICES.SMARTPLUG.TMPL>/# <SERVICES.SMARTPLUG.TMPL>${ESCAPED}/g" $DOCKER_COMPOSE_DATACOLECTOR_PATH);
+    echo "$DATACOLECTOR_SERVICES_RENDERED";
+}
+
+function generate_docker_compose_datacolector_sample()
+{
+    # Create datacolector docker-compose file from 'smartdetect/data/device.list'
+    echo "-------------------------------------------------------------------------------";
+    echo "Create datacolector docker-compose file from template with new device.list data";
+    echo "-------------------------------------------------------------------------------";
+    DATACOLECTOR_SERVICES_RENDERED=$(render_docker_compose_datacolector_sample);
+    echo "$DATACOLECTOR_SERVICES_RENDERED" > docker-compose-datacolector.yml;
+    cat docker-compose-datacolector.yml;
+    echo "-------------------------------------------------------------------------------";
+}
+
+function render_docker_compose_datacolector_empty()
+{
+    # replace docker-compose-datacolector.yml
+    printf "version: '2.2'\n\nnetworks:\n  smartplug-network:\n    driver: bridge\n";
+}
+
+function generate_docker_compose_datacolector_empty()
+{
+    # Create datacolector docker-compose file from 'smartdetect/data/device.list'
+    echo "-------------------------------------------------------------------------------";
+    echo "Create datacolector docker-compose file from template with new device.list data";
+    echo "-------------------------------------------------------------------------------";
+    DATACOLECTOR_SERVICES_RENDERED=$(render_docker_compose_datacolector_empty);
+    echo "$DATACOLECTOR_SERVICES_RENDERED" > docker-compose-datacolector.yml;
+    cat docker-compose-datacolector.yml;
+    echo "-------------------------------------------------------------------------------";
+}
