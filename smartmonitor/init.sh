@@ -42,7 +42,7 @@ do
                 echo "DEVICE_METADATA=$DEVICE_METADATA";
                 DEVICE_LINE=$(cat $DEVICE_LIST_PATH | grep -n "$DEVICE_METADATA" | grep -Eo '^[^:]+');
                 echo "DEVICE_LINE=$DEVICE_LINE";
-                sed -i -e "${DEVICE_LINE}d" $DEVICE_LIST_PATH; # TODO: check if this is correct, note 'd' char!!!
+                sed -i -e "${DEVICE_LINE}d" $DEVICE_LIST_PATH;
                 generate_docker_compose_datacolector;
                 send_slack_message "Remove device due to read response errors: $COUNT" \
                     "$(echo $DEVICE_METADATA | sed -e "s/\[//g" | sed -e "s/\]//g" | sed -e "s/|/\\t/g")" \
