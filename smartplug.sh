@@ -30,6 +30,7 @@ then
     echo "logs-smartmonitor";
     echo "grafana";
     echo "list";
+    echo "simulator";
     exit $RETURN_ERROR;
 fi
 
@@ -95,6 +96,13 @@ then
     echo "Option: list [ACTIVE]";
     LIST=1;
 fi
+
+SIMULATOR=0;
+if [[ $(echo $ARGS_LINES | grep "simulator") ]]
+then
+    echo "Option: simulator [ACTIVE]";
+    SIMULATOR=1;
+fi
 # --------------------------------------------------------------------------
 
 
@@ -119,6 +127,16 @@ then
     generate_docker_compose_datacolector_sample;
     docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml build;
     generate_docker_compose_datacolector_empty;
+fi
+
+# simulator (launches a docker container with a restapi to simulate the smartplug device)
+if [[ "$SIMULATOR" = "1" ]]
+then
+    echo "------------------------------------------------------------";
+    echo "Simulador";
+    echo "------------------------------------------------------------";
+    (cd smartemulator && docker build -t smartplug-emulator .);
+    docker run -p 9999:9999 --rm --name smartplug-emulator-device smartplug-emulator;
 fi
 
 # docker-compose up
