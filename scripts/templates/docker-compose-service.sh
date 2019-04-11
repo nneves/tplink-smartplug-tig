@@ -20,20 +20,21 @@ DOCKER_COMPOSE_SERVICE_PATH="$SCRIPT_PATH/docker-compose-service.yml";
 # --------------------------------------------------------------------------
 # check if not arguments are set, prints help
 # --------------------------------------------------------------------------
-if [[ $# != 5 || "$1" =  "help" || "$1" =  "--help" ]]
+if [[ $# != 6 || "$1" =  "help" || "$1" =  "--help" ]]
 then
-  echo "Usage: $0 \$DEVICE_NUMBER \$DEVICE_INTERVAL \$DEVICE_NAME \$DEVICE_IP \$DEVICE_MAC";
+  echo "Usage: $0 \$INFLUXDB_URL \$DEVICE_NUMBER \$DEVICE_INTERVAL \$DEVICE_NAME \$DEVICE_IP \$DEVICE_MAC";
   exit $RETURN_ERROR;
 fi
 
 # --------------------------------------------------------------------------
 # load variables from arguments
 # --------------------------------------------------------------------------
-DEVICE_NUMBER="$1";
-DEVICE_INTERVAL="$2";
-DEVICE_NAME="$3";
-DEVICE_IP="$4";
-DEVICE_MAC="$5";
+INFLUXDB_URL="$1"
+DEVICE_NUMBER="$2";
+DEVICE_INTERVAL="$3";
+DEVICE_NAME="$4";
+DEVICE_IP="$5";
+DEVICE_MAC="$6";
 
 # --------------------------------------------------------------------------
 # parse docker-compose-service.yml

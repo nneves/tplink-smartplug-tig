@@ -113,9 +113,14 @@ fi
 if [[ "$LIST" = "1" ]]
 then
     echo "------------------------------------------------------------";
-    echo "List";
+    echo "List: InfraStructure";
     echo "------------------------------------------------------------";
-    docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml ps;
+    docker-compose -p smartplug -f docker-compose.yml ps;
+    echo "------------------------------------------------------------";
+    echo "List: DataCollector";
+    echo "------------------------------------------------------------";
+    docker-compose -p smartplug -f docker-compose-datacolector.yml ps;
+    echo "------------------------------------------------------------";
 fi
 
 # build
@@ -124,8 +129,11 @@ then
     echo "------------------------------------------------------------";
     echo "Build";
     echo "------------------------------------------------------------";
+    # InfraStructure (InfluxDB+Grafana)
+    docker-compose -p smartplug -f docker-compose.yml build;
+    # DataCollector (telegraf specific containers)
     generate_docker_compose_datacolector_sample;
-    docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml build;
+    docker-compose -p smartplug -f docker-compose-datacolector.yml build;
     generate_docker_compose_datacolector_empty;
 fi
 
@@ -145,10 +153,12 @@ then
     echo "------------------------------------------------------------";
     echo "[UP] Running services";
     echo "------------------------------------------------------------";
-    # generate docker-compose for telegraf datacoletor services
+    # launch InfraStructure (InfluxDB+Grafana)
+    docker-compose -p smartplug -f docker-compose.yml up -d;
+    # launch DataCollector (telegraf specific containers)
+    ## generate docker-compose for telegraf datacoletor services
     generate_docker_compose_datacolector;
-    # launch all services
-    docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml up -d;
+    docker-compose -p smartplug -f docker-compose-datacolector.yml up -d;
     # launch scripts
     SCAN_INTERVAL=30 NC_TIMEOUT=15 NETWORK_IP_START_OCTET=1 NETWORK_IP_END_OCTET=254 \
         ./smartdetect/init.sh > ./scripts/logs/smartdetect.log 2>&1 &
@@ -205,7 +215,7 @@ then
                 | grep "$telegraf");
             echo "$telegraf: $SIGNATURE";
             echo "------------------------------------------------------------";
-            docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml logs $telegraf | tail -n 20;
+            docker-compose -p smartplug -f docker-compose-datacolector.yml logs $telegraf | tail -n 50;
             echo "------------------------------------------------------------";
             echo "";
         done;
@@ -236,9 +246,11 @@ then
     echo "------------------------------------------------------------";
     echo "[DOWN] Shuting down services";
     echo "------------------------------------------------------------";
-    # stop all docker services
-    docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml stop;
-    docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml rm --force;
+    # stop/reset all docker services
+    ## InfraStructure (InfluxDB+Grafana)
+    docker-compose -p smartplug -f docker-compose.yml down;
+    ## DataCollector (telegraf specific containers)
+    docker-compose -p smartplug -f docker-compose-datacolector.yml down;
     # send slack notification
     send_slack_message "Stop Smart Wi-Fi Plug Energy Monitoring System" "" $MESSAGE_COLOR_RED;
     # stop scritps

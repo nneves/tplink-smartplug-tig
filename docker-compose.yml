@@ -15,7 +15,7 @@ services:
     volumes:
       - ./influxdb/data:/var/lib/influxdb
     networks:
-      - smartplug-network
+      - smartplug-infrastructure-network
 
   # # Define a service for using the influx CLI tool.
   # # docker-compose -p smartplug run influxdb-cli
@@ -29,7 +29,7 @@ services:
   #   depends_on:
   #     - influxdb
   #   networks:
-  #     - smartplug-network
+  #     - smartplug-infrastructure-network
 
   # # Define a Chronograf service
   # chronograf:
@@ -44,7 +44,7 @@ services:
   #   depends_on:
   #     - influxdb
   #   networks:
-  #     - smartplug-network
+  #     - smartplug-infrastructure-network
 
   # Define a Grafana service
   grafana:
@@ -60,8 +60,8 @@ services:
     volumes:
       - ./grafana/data:/var/lib/grafana
     networks:
-      - smartplug-network
+      - smartplug-infrastructure-network
 
 networks:
-  smartplug-network:
+  smartplug-infrastructure-network:
     driver: bridge

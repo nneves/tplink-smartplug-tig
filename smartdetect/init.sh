@@ -82,7 +82,7 @@ do
                 echo "Found ACTIVE $device in $FILEDATA, skip 'tplink_smartplug' INFO request.";
                 continue;
             fi;
-            ### launch command in parallel
+            ### launch command in parallel (run independent docker container just to extract powerplug info)
             docker run --rm datacolector /usr/bin/tplink_smartplug -t $device -c info \
                 | grep "Received" \
                 | sed -e "s/  */ /g" \
@@ -138,7 +138,7 @@ do
                         | grep "$devicemac|$deviceip|$devicealias" \
                         | cut -d '|' -f 4);
                 printf "\e[33mLaunch docker container for: $DATACOLECTOR!\n\e[39m";
-                docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml up -d $DATACOLECTOR;
+                docker-compose -p smartplug -f docker-compose-datacolector.yml up -d $DATACOLECTOR;
                 send_slack_message "Found new smartplug device:" "$devicemac\t$deviceip\t$devicealias" $MESSAGE_COLOR_BLUE;
                 printf "\e[33m#------------------------------------------------------------\e[39m\n";
             fi;

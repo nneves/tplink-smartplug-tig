@@ -24,7 +24,7 @@ do
     (docker ps --filter "name=datacolector" --format "{{.Names}}" | sort) | {
         while IFS= read -r telegraf
         do
-            LOGS=$(docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml logs $telegraf | tail -n 100 | grep "$ERROR_MESSAGE");
+            LOGS=$(docker-compose -p smartplug -f docker-compose-datacolector.yml logs $telegraf | tail -n 100 | grep "$ERROR_MESSAGE");
             COUNT=$(echo "$LOGS" | wc -l);
             SIGNATURE=$(cat docker-compose-datacolector.yml \
                 | grep "# SIGNATURE" \
@@ -35,8 +35,8 @@ do
             if [ $COUNT -ge 20 ]
             then
                 echo "Terminate $telegraf due to read response errors.";
-                docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml stop $telegraf;
-                docker-compose -p smartplug -f docker-compose.yml -f docker-compose-datacolector.yml rm -f $telegraf;
+                docker-compose -p smartplug -f docker-compose-datacolector.yml stop $telegraf;
+                docker-compose -p smartplug -f docker-compose-datacolector.yml rm -f $telegraf;
                 # get device.list line number
                 DEVICE_METADATA=$(echo "$SIGNATURE" | sed -e "s/\  //g" | sed -e "s/\ //" | sed -e "s/\[//g" | sed -e "s/\]//g" | sed -e "s/|$telegraf//g");
                 echo "DEVICE_METADATA=$DEVICE_METADATA";

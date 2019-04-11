@@ -2,6 +2,7 @@
   datacolector-$DEVICE_NUMBER:
     container_name: datacolector-$DEVICE_NUMBER
     environment:
+      STR_INFLUXDB_URL: "$INFLUXDB_URL"
       STR_DEVICE_INTERVAL: "$DEVICE_INTERVAL"
       STR_DEVICE_NAME: "$DEVICE_NAME"
       STR_DEVICE_IP: "$DEVICE_IP"

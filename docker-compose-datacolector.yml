@@ -1,5 +1,5 @@
 version: '2.2'
 
 networks:
-  smartplug-network:
+  smartplug-datacollector-network:
     driver: bridge

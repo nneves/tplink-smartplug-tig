@@ -12,11 +12,11 @@ x-function: &datacolector-function
   volumes:
     - ./datacolector/conf/telegraf-smartplug.conf:/etc/telegraf/telegraf.conf:ro
   networks:
-    - smartplug-network
+    - smartplug-datacollector-network
 
 services:
 # <SERVICES.SMARTPLUG.TMPL>
 
 networks:
-  smartplug-network:
+  smartplug-datacollector-network:
     driver: bridge

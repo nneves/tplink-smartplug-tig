@@ -1,5 +1,12 @@
 #/bin/bash
 
+# Mac OS X + Linux Ubuntu
+HOST_IP_ADDRESS=$(ipconfig getifaddr en0 2>/dev/null; ifconfig 2>/dev/null | grep -v "127.0.0.1" | grep -oP '(?<=inet\saddr:)\d+(\.\d+){3}';);
+echo "HOST_IP_ADDRESS=$HOST_IP_ADDRESS";
+
+INFLUXDB_URL="http://${HOST_IP_ADDRESS}:8086"
+echo "INFLUXDB_URL=$INFLUXDB_URL";
+
 SERVICES_INTERVAL="${SERVICES_INTERVAL:-5s}"
 DEVICE_LIST_PATH="./smartdetect/data/device.list";
 DOCKER_COMPOSE_DATACOLECTOR_PATH="./scripts/templates/docker-compose-datacolector.yml";
@@ -27,14 +34,14 @@ function render_docker_compose_datacolector()
             local DEVICE_IP="$(echo $device | cut -d '|' -f 2)";
             local DEVICE_MAC="$(echo $device | cut -d '|' -f 1)";
 
-            local DATACOLECTOR_SERVICES_PARTIAL=$($GENERATE_DATACOLECTOR_SERVICE_PATH $DEVICE_NUMBER $DEVICE_INTERVAL "$DEVICE_NAME" $DEVICE_IP $DEVICE_MAC);
+            local DATACOLECTOR_SERVICES_PARTIAL=$($GENERATE_DATACOLECTOR_SERVICE_PATH $DEVICE_NUMBER $INFLUXDB_URL $DEVICE_INTERVAL "$DEVICE_NAME" $DEVICE_IP $DEVICE_MAC);
             DATACOLECTOR_SERVICES=$(printf "${DATACOLECTOR_SERVICES}\n${DATACOLECTOR_SERVICES_PARTIAL}\n");
             COUNTER=$((COUNTER+1));
         done;
         # check if COUNTER=0, renders a default valid empty docker-compose-datacolector.yml
         if [[ "$COUNTER" = "0" ]]
         then
-            printf "version: '2.2'\n\nnetworks:\n  smartplug-network:\n    driver: bridge\n";
+            printf "version: '2.2'\n\nnetworks:\n  smartplug-datacollector-network:\n    driver: bridge\n";
         else
             # replace docker-compose-datacolector.yml
             local ESCAPED=$(echo "${DATACOLECTOR_SERVICES}" | sed '$!s@$@\\@g');
@@ -68,7 +75,7 @@ function render_docker_compose_datacolector_sample()
     local DEVICE_IP="127.0.0.1";
     local DEVICE_MAC="11:22:33:44:55:66";
 
-    local DATACOLECTOR_SERVICES_PARTIAL=$($GENERATE_DATACOLECTOR_SERVICE_PATH $DEVICE_NUMBER $DEVICE_INTERVAL "$DEVICE_NAME" $DEVICE_IP $DEVICE_MAC);
+    local DATACOLECTOR_SERVICES_PARTIAL=$($GENERATE_DATACOLECTOR_SERVICE_PATH $INFLUXDB_URL $DEVICE_NUMBER $DEVICE_INTERVAL "$DEVICE_NAME" $DEVICE_IP $DEVICE_MAC);
     DATACOLECTOR_SERVICES=$(printf "${DATACOLECTOR_SERVICES}\n${DATACOLECTOR_SERVICES_PARTIAL}\n");
 
     # replace docker-compose-datacolector.yml
@@ -92,7 +99,7 @@ function generate_docker_compose_datacolector_sample()
 function render_docker_compose_datacolector_empty()
 {
     # replace docker-compose-datacolector.yml
-    printf "version: '2.2'\n\nnetworks:\n  smartplug-network:\n    driver: bridge\n";
+    printf "version: '2.2'\n\nnetworks:\n  smartplug-datacollector-network:\n    driver: bridge\n";
 }
 
 function generate_docker_compose_datacolector_empty()

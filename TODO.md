@@ -1,7 +1,8 @@
 # TODO List
 
+* [ ] Split existing docker-compose, InfluxDB+Grafana should be isolated from Telegraf
 * [ ] Linux service install script (sudo service smartplug start)
-* [ ] Run docker container to simulate a smartplug
+* [x] Run docker container to simulate a smartplug
 * [ ] Smartplug update service, checks repor for updates, git pull and restart (explicit UPDATE flag required)
 * [ ] Grafana initialization should allow to import base Graphs (custom init flag, script should check if grafana folder is empty)
 * [ ] Grafana initialization: check for grafana first launch, setup initialization procedure to add user,pw
