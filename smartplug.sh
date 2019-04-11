@@ -8,7 +8,6 @@ then
     source .env;
 fi
 source ./scripts/send_slack_message.sh;
-source ./scripts/generate_docker_compose_datacolector.sh;
 
 # --------------------------------------------------------------------------
 # constants
@@ -22,6 +21,8 @@ RETURN_ERROR=1;
 if [[ $# -eq 0 || "$1" =  "help" || "$1" =  "--help" ]]
 then
     echo "Usage: $0 [Options]";
+    echo "config";
+    echo "reset-data";
     echo "build";
     echo "up";
     echo "down";
@@ -30,6 +31,7 @@ then
     echo "logs-smartmonitor";
     echo "grafana";
     echo "list";
+    echo "provisioning";
     echo "simulator";
     exit $RETURN_ERROR;
 fi
@@ -41,6 +43,20 @@ fi
 ARGS_LINES=$(echo $@ | tr " " "\n" | tr A-Z a-z);
 
 # check for build option
+CONFIG=0;
+if [[ $(echo $ARGS_LINES | grep "config") ]]
+then
+    echo "Option: config [ACTIVE]";
+    CONFIG=1;
+fi
+
+RESET_DATA=0;
+if [[ $(echo $ARGS_LINES | grep "reset-data") ]]
+then
+    echo "Option: reset-data [ACTIVE]";
+    RESET_DATA=1;
+fi
+
 BUILD=0;
 if [[ $(echo $ARGS_LINES | grep "build") ]]
 then
@@ -97,6 +113,13 @@ then
     LIST=1;
 fi
 
+PROVISIONING=0;
+if [[ $(echo $ARGS_LINES | grep "provisioning") ]]
+then
+    echo "Option: provisioning [ACTIVE]";
+    PROVISIONING=1;
+fi
+
 SIMULATOR=0;
 if [[ $(echo $ARGS_LINES | grep "simulator") ]]
 then
@@ -115,13 +138,30 @@ then
     echo "------------------------------------------------------------";
     echo "List: InfraStructure";
     echo "------------------------------------------------------------";
-    docker-compose -p smartplug -f docker-compose.yml ps;
+    docker-compose ps;
     echo "------------------------------------------------------------";
     echo "List: DataCollector";
     echo "------------------------------------------------------------";
-    docker-compose -p smartplug -f docker-compose-datacolector.yml ps;
+    ### TODO:
     echo "------------------------------------------------------------";
 fi
+
+# reset-data
+if [[ "$RESET_DATA" = "1" ]]
+then
+    echo "------------------------------------------------------------";
+    echo "Reset Data";
+    echo "------------------------------------------------------------";
+    read -p "Do you want to delete InfluxDB and Grafana local \"data\" (y/n)?" yn;
+    case $yn in
+        [Yy]* ) docker-compose down;
+                rm -rf ./grafana/data/*;
+                rm -rf ./influxdb/data/*;
+            ;;
+        [Nn]* ) echo "Operation CANCELED!"; exit $RETURN_ERROR;;
+    esac
+fi
+
 
 # build
 if [[ "$BUILD" = "1" ]]
@@ -130,11 +170,9 @@ then
     echo "Build";
     echo "------------------------------------------------------------";
     # InfraStructure (InfluxDB+Grafana)
-    docker-compose -p smartplug -f docker-compose.yml build;
+    docker-compose build;
     # DataCollector (telegraf specific containers)
-    generate_docker_compose_datacolector_sample;
-    docker-compose -p smartplug -f docker-compose-datacolector.yml build;
-    generate_docker_compose_datacolector_empty;
+    ### TODO:
 fi
 
 # simulator (launches a docker container with a restapi to simulate the smartplug device)
@@ -154,21 +192,21 @@ then
     echo "[UP] Running services";
     echo "------------------------------------------------------------";
     # launch InfraStructure (InfluxDB+Grafana)
-    docker-compose -p smartplug -f docker-compose.yml up -d;
+    docker-compose up -d;
     # launch DataCollector (telegraf specific containers)
-    ## generate docker-compose for telegraf datacoletor services
-    generate_docker_compose_datacolector;
-    docker-compose -p smartplug -f docker-compose-datacolector.yml up -d;
+    ### TODO:
     # launch scripts
-    SCAN_INTERVAL=30 NC_TIMEOUT=15 NETWORK_IP_START_OCTET=1 NETWORK_IP_END_OCTET=254 \
-        ./smartdetect/init.sh > ./scripts/logs/smartdetect.log 2>&1 &
-    JOB_PID=$!;
-    echo "$JOB_PID" > ./scripts/pids/smartdetect.pid;
-    echo "Launched script: smartdetect";
-    ./smartmonitor/init.sh > ./scripts/logs/smartmonitor.log 2>&1 &
-    JOB_PID=$!;
-    echo "$JOB_PID" > ./scripts/pids/smartmonitor.pid;
-    echo "Launched script: smartmonitor";
+    ### TODO: fix
+    # SCAN_INTERVAL=30 NC_TIMEOUT=15 NETWORK_IP_START_OCTET=1 NETWORK_IP_END_OCTET=254 \
+    #     ./smartdetect/init.sh > ./scripts/logs/smartdetect.log 2>&1 &
+    # JOB_PID=$!;
+    # echo "$JOB_PID" > ./scripts/pids/smartdetect.pid;
+    # echo "Launched script: smartdetect";
+    ### TODO: fix
+    # ./smartmonitor/init.sh > ./scripts/logs/smartmonitor.log 2>&1 &
+    # JOB_PID=$!;
+    # echo "$JOB_PID" > ./scripts/pids/smartmonitor.pid;
+    # echo "Launched script: smartmonitor";
     # slack notification
     send_slack_message "Start Smart Wi-Fi Plug Energy Monitoring System" "" $MESSAGE_COLOR_GREEN;
 fi
@@ -195,7 +233,6 @@ then
         sleep 1;
     done
     echo "";
-
     open http://localhost:3000;
 fi
 
@@ -205,21 +242,22 @@ then
     echo "------------------------------------------------------------";
     echo "[LOGS_DATACOLECTOR] Attach to services logs-datacolector";
     echo "------------------------------------------------------------";
-    (docker ps --filter "name=datacolector" --format "{{.Names}}" | sort) | {
-        while IFS= read -r telegraf
-        do
-            echo "------------------------------------------------------------";
-            SIGNATURE=$(cat docker-compose-datacolector.yml \
-                | grep "# SIGNATURE" \
-                | sed -e 's/# SIGNATURE://g' \
-                | grep "$telegraf");
-            echo "$telegraf: $SIGNATURE";
-            echo "------------------------------------------------------------";
-            docker-compose -p smartplug -f docker-compose-datacolector.yml logs $telegraf | tail -n 50;
-            echo "------------------------------------------------------------";
-            echo "";
-        done;
-    }
+    ### TODO:
+    # (docker ps --filter "name=datacolector" --format "{{.Names}}" | sort) | {
+    #     while IFS= read -r telegraf
+    #     do
+    #         echo "------------------------------------------------------------";
+    #         SIGNATURE=$(cat docker-compose-datacolector.yml \
+    #             | grep "# SIGNATURE" \
+    #             | sed -e 's/# SIGNATURE://g' \
+    #             | grep "$telegraf");
+    #         echo "$telegraf: $SIGNATURE";
+    #         echo "------------------------------------------------------------";
+    #         docker-compose -p smartplug -f docker-compose-datacolector.yml logs $telegraf | tail -n 50;
+    #         echo "------------------------------------------------------------";
+    #         echo "";
+    #     done;
+    # }
 fi
 
 # docker-compose logs
@@ -248,9 +286,9 @@ then
     echo "------------------------------------------------------------";
     # stop/reset all docker services
     ## InfraStructure (InfluxDB+Grafana)
-    docker-compose -p smartplug -f docker-compose.yml down --remove-orphans;
+    docker-compose down;
     ## DataCollector (telegraf specific containers)
-    docker-compose -p smartplug -f docker-compose-datacolector.yml down --remove-orphans;
+    ### TODO:
     # send slack notification
     send_slack_message "Stop Smart Wi-Fi Plug Energy Monitoring System" "" $MESSAGE_COLOR_RED;
     # stop scritps

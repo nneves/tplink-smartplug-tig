@@ -1,6 +1,9 @@
 .env
-influxdb/data
-grafana/data
+influxdb/data/*
+grafana/data/*
 chronograf/data
 smartdetect/data
 smartdetect/*.log
+
+!influxdb/data/.gitignore
+!grafana/data/.gitignore
