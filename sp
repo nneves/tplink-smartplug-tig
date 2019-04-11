@@ -293,22 +293,22 @@ then
     docker-compose build;
     # DataCollector (telegraf specific containers)
     (cd smartcolector && docker build -t smartplug-colector .);
-    INFLUXDB="http://$HOST_IP_ADDRESS:8086"
-    DEVICE_INTERVAL="10s";
-    #DEVICE_NAME="Smartplug Device";
-    DEVICE_NAME="Smartplug Emulator";
-    #DEVICE_IP="192.168.1.65";
-    DEVICE_IP="192.168.1.80";
-    STR_DEVICE_MAC="11:22:33:44";
-    docker run --rm \
-        --hostname "$HOST_NAME" \
-        --env STR_INFLUXDB="$INFLUXDB" \
-        --env STR_DEVICE_INTERVAL="$DEVICE_INTERVAL" \
-        --env STR_DEVICE_NAME="$DEVICE_NAME" \
-        --env STR_DEVICE_IP="$DEVICE_IP" \
-        --env STR_DEVICE_MAC="$DEVICE_MAC" \
-        --volume "$PWD/smartcolector/conf/telegraf-smartplug.conf:/etc/telegraf/telegraf.conf:ro" \
-        --name smartplug-colector-02 smartplug-colector;
+    # INFLUXDB="http://$HOST_IP_ADDRESS:8086"
+    # DEVICE_INTERVAL="10s";
+    # #DEVICE_NAME="Smartplug Device";
+    # DEVICE_NAME="Smartplug Emulator";
+    # #DEVICE_IP="192.168.1.65";
+    # DEVICE_IP="192.168.1.80";
+    # STR_DEVICE_MAC="11:22:33:44";
+    # docker run --rm \
+    #     --hostname "$HOST_NAME" \
+    #     --env STR_INFLUXDB="$INFLUXDB" \
+    #     --env STR_DEVICE_INTERVAL="$DEVICE_INTERVAL" \
+    #     --env STR_DEVICE_NAME="$DEVICE_NAME" \
+    #     --env STR_DEVICE_IP="$DEVICE_IP" \
+    #     --env STR_DEVICE_MAC="$DEVICE_MAC" \
+    #     --volume "$PWD/smartcolector/conf/telegraf-smartplug.conf:/etc/telegraf/telegraf.conf:ro" \
+    #     --name smartplug-colector-02 smartplug-colector;
 fi
 
 # simulator (launches a docker container with a restapi to simulate the smartplug device)
