@@ -7,9 +7,7 @@ services:
     container_name: influxdb
     restart: always
     ports:
-      - "8083:8083"
       - "8086:8086"
-      - "8090:8090"
     env_file:
       - ./influxdb/env/env.influxdb
     volumes:
