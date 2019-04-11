@@ -18,10 +18,12 @@ RETURN_ERROR=1;
 # --------------------------------------------------------------------------
 # SYSTEM ENV VARS: required for docker-compose
 # --------------------------------------------------------------------------
+# Mac OS X + Linux Ubuntu
+export HOST_IP_ADDRESS=$(ipconfig getifaddr en0 2>/dev/null; ifconfig 2>/dev/null | grep -v "127.0.0.1" | grep -oP '(?<=inet\saddr:)\d+(\.\d+){3}';);
 export HOST_NAME=$HOSTNAME;
 export USER_ID=$UID;
 echo "------------------------------------------------------------";
-echo "HOST_NAME=$HOST_NAME, USER_ID=$USER_ID";
+echo "HOST_NAME=$HOST_NAME, HOST_IP_ADDRESS=$HOST_IP_ADDRESS, USER_ID=$USER_ID";
 echo "------------------------------------------------------------";
 
 # --------------------------------------------------------------------------
@@ -31,11 +33,12 @@ if [[ $# -eq 0 || "$1" =  "help" || "$1" =  "--help" ]]
 then
     echo "Usage: $0 [Options]";
     echo "config";
-    echo "reset-data";
+    echo "reset-data-influxdb";
+    echo "reset-data-grafana";
     echo "build";
     echo "up";
     echo "down";
-    echo "logs-datacolector";
+    echo "logs-smartcolector";
     echo "logs-smartdetect";
     echo "logs-smartmonitor";
     echo "grafana";
@@ -59,11 +62,18 @@ then
     CONFIG=1;
 fi
 
-RESET_DATA=0;
-if [[ $(echo $ARGS_LINES | grep "reset-data") ]]
+RESET_DATA_INFLUXDB=0;
+if [[ $(echo $ARGS_LINES | grep "reset-data-influxdb") ]]
 then
-    echo "Option: reset-data [ACTIVE]";
-    RESET_DATA=1;
+    echo "Option: reset-data-influxdb [ACTIVE]";
+    RESET_DATA_INFLUXDB=1;
+fi
+
+RESET_DATA_GRAFANA=0;
+if [[ $(echo $ARGS_LINES | grep "reset-data-grafana") ]]
+then
+    echo "Option: reset-data-grafana [ACTIVE]";
+    RESET_DATA_GRAFANA=1;
 fi
 
 BUILD=0;
@@ -87,11 +97,11 @@ then
     SERVICE_DOWN=1;
 fi
 
-LOGS_DATACOLECTOR=0;
-if [[ $(echo $ARGS_LINES | grep "logs-datacolector") ]]
+LOGS_SMARTCOLECTOR=0;
+if [[ $(echo $ARGS_LINES | grep "logs-smartcolector") ]]
 then
-    echo "Option: logs-datacolector [ACTIVE]";
-    LOGS_DATACOLECTOR=1;
+    echo "Option: logs-smartcolector [ACTIVE]";
+    LOGS_SMARTCOLECTOR=1;
 fi
 
 LOGS_SMARTDETECT=0;
@@ -156,16 +166,30 @@ then
 fi
 
 # reset-data
-if [[ "$RESET_DATA" = "1" ]]
+if [[ "$RESET_DATA_INFLUXDB" = "1" ]]
 then
     echo "------------------------------------------------------------";
-    echo "Reset Data";
+    echo "Reset Data: InfluxDB";
     echo "------------------------------------------------------------";
-    read -p "Do you want to delete InfluxDB and Grafana local \"data\" (y/n)?" yn;
+    read -p "Do you want to delete InfluxDB local \"data\" (y/n)? " yn;
     case $yn in
-        [Yy]* ) docker-compose down;
-                rm -rf ./grafana/data/*;
+        [Yy]* ) (docker-compose down &>/dev/null);
                 rm -rf ./influxdb/data/*;
+            ;;
+        [Nn]* ) echo "Operation CANCELED!"; exit $RETURN_ERROR;;
+    esac
+fi
+
+# reset-data
+if [[ "$RESET_DATA_GRAFANA" = "1" ]]
+then
+    echo "------------------------------------------------------------";
+    echo "Reset Data: Grafana";
+    echo "------------------------------------------------------------";
+    read -p "Do you want to delete Grafana local \"data\" (y/n)? " yn;
+    case $yn in
+        [Yy]* ) (docker-compose down &>/dev/null);
+                rm -rf ./grafana/data/*;
             ;;
         [Nn]* ) echo "Operation CANCELED!"; exit $RETURN_ERROR;;
     esac
@@ -178,7 +202,7 @@ then
     echo "Config";
     echo "------------------------------------------------------------";
 
-    read -p "Do you want to setup a new admin password for Grafana (y/n)?" yn;
+    read -p "Do you want to setup a new admin password for Grafana (y/n)? " yn;
     case $yn in
         [Yy]* ) ;;
         * ) echo "Operation CANCELED!"; exit $RETURN_ERROR;;
@@ -268,7 +292,23 @@ then
     # InfraStructure (InfluxDB+Grafana)
     docker-compose build;
     # DataCollector (telegraf specific containers)
-    ### TODO:
+    (cd smartcolector && docker build -t smartplug-colector .);
+    INFLUXDB="http://$HOST_IP_ADDRESS:8086"
+    DEVICE_INTERVAL="10s";
+    #DEVICE_NAME="Smartplug Device";
+    DEVICE_NAME="Smartplug Emulator";
+    #DEVICE_IP="192.168.1.65";
+    DEVICE_IP="192.168.1.80";
+    STR_DEVICE_MAC="11:22:33:44";
+    docker run --rm \
+        --hostname "$HOST_NAME" \
+        --env STR_INFLUXDB="$INFLUXDB" \
+        --env STR_DEVICE_INTERVAL="$DEVICE_INTERVAL" \
+        --env STR_DEVICE_NAME="$DEVICE_NAME" \
+        --env STR_DEVICE_IP="$DEVICE_IP" \
+        --env STR_DEVICE_MAC="$DEVICE_MAC" \
+        --volume "$PWD/smartcolector/conf/telegraf-smartplug.conf:/etc/telegraf/telegraf.conf:ro" \
+        --name smartplug-colector-02 smartplug-colector;
 fi
 
 # simulator (launches a docker container with a restapi to simulate the smartplug device)
@@ -333,10 +373,10 @@ then
 fi
 
 # docker-compose logs
-if [[ "$LOGS_DATACOLECTOR" = "1" ]]
+if [[ "$LOGS_SMARTCOLECTOR" = "1" ]]
 then
     echo "------------------------------------------------------------";
-    echo "[LOGS_DATACOLECTOR] Attach to services logs-datacolector";
+    echo "[LOGS_SMARTCOLECTOR] Attach to services logs-smartcolector";
     echo "------------------------------------------------------------";
     ### TODO:
     # (docker ps --filter "name=datacolector" --format "{{.Names}}" | sort) | {
