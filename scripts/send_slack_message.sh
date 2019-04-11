@@ -15,7 +15,12 @@ MESSAGE_COLOR_GRAY="#CCD1D1";
 function send_slack_message() {
     if [ -n "${SLACK_WEBHOOK_URL}" ]
     then
-        echo "=> Slack Message: ${1}\n${2}";
+        if [ -n "${2}" ]
+        then
+            echo "=> Slack Message: ${1}\n${2}";
+        else
+            echo "=> Slack Message: ${1}";
+        fi
         COLOR="${3:-MESSAGE_COLOR_GRAY}";
         MESSAGE=" \
         {
