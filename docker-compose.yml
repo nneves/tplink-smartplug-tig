@@ -55,6 +55,7 @@ services:
       - "3000:3000"
     env_file:
       - ./grafana/env/env.grafana
+    user: "$USER_ID"
     depends_on:
       - influxdb
     volumes:
