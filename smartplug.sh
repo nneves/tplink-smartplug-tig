@@ -40,7 +40,7 @@ fi
 # Get ARGS into LINES, lowercase all strings
 ARGS_LINES=$(echo $@ | tr " " "\n" | tr A-Z a-z);
 
-#  check for build option
+# check for build option
 BUILD=0;
 if [[ $(echo $ARGS_LINES | grep "build") ]]
 then
@@ -248,9 +248,9 @@ then
     echo "------------------------------------------------------------";
     # stop/reset all docker services
     ## InfraStructure (InfluxDB+Grafana)
-    docker-compose -p smartplug -f docker-compose.yml down;
+    docker-compose -p smartplug -f docker-compose.yml down --remove-orphans;
     ## DataCollector (telegraf specific containers)
-    docker-compose -p smartplug -f docker-compose-datacolector.yml down;
+    docker-compose -p smartplug -f docker-compose-datacolector.yml down --remove-orphans;
     # send slack notification
     send_slack_message "Stop Smart Wi-Fi Plug Energy Monitoring System" "" $MESSAGE_COLOR_RED;
     # stop scritps

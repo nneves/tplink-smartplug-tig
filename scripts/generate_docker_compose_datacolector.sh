@@ -1,13 +1,6 @@
 #/bin/bash
 
-# Mac OS X + Linux Ubuntu
-HOST_IP_ADDRESS=$(ipconfig getifaddr en0 2>/dev/null; ifconfig 2>/dev/null | grep -v "127.0.0.1" | grep -oP '(?<=inet\saddr:)\d+(\.\d+){3}';);
-echo "HOST_IP_ADDRESS=$HOST_IP_ADDRESS";
-
-INFLUXDB_URL="http://${HOST_IP_ADDRESS}:8086"
-echo "INFLUXDB_URL=$INFLUXDB_URL";
-
-SERVICES_INTERVAL="${SERVICES_INTERVAL:-5s}"
+SERVICES_INTERVAL="${SERVICES_INTERVAL:-5s}";
 DEVICE_LIST_PATH="./smartdetect/data/device.list";
 DOCKER_COMPOSE_DATACOLECTOR_PATH="./scripts/templates/docker-compose-datacolector.yml";
 GENERATE_DATACOLECTOR_SERVICE_PATH="./scripts/templates/docker-compose-service.sh";
@@ -17,6 +10,10 @@ GENERATE_DATACOLECTOR_SERVICE_PATH="./scripts/templates/docker-compose-service.s
 # ------------------------------------------------------------
 function render_docker_compose_datacolector()
 {
+    # Mac OS X + Linux Ubuntu
+    local HOST_IP_ADDRESS=$(ipconfig getifaddr en0 2>/dev/null; ifconfig 2>/dev/null | grep -v "127.0.0.1" | grep -oP '(?<=inet\saddr:)\d+(\.\d+){3}';);
+    local INFLUXDB_URL="http:\/\/${HOST_IP_ADDRESS}:8086";
+
     # main loop, render DATACOLECTOR_SERVICES_PARTIAL
     local COUNTER=0;
     local DATACOLECTOR_SERVICES='';
@@ -34,7 +31,7 @@ function render_docker_compose_datacolector()
             local DEVICE_IP="$(echo $device | cut -d '|' -f 2)";
             local DEVICE_MAC="$(echo $device | cut -d '|' -f 1)";
 
-            local DATACOLECTOR_SERVICES_PARTIAL=$($GENERATE_DATACOLECTOR_SERVICE_PATH $DEVICE_NUMBER $INFLUXDB_URL $DEVICE_INTERVAL "$DEVICE_NAME" $DEVICE_IP $DEVICE_MAC);
+            local DATACOLECTOR_SERVICES_PARTIAL=$($GENERATE_DATACOLECTOR_SERVICE_PATH $INFLUXDB_URL $DEVICE_NUMBER $DEVICE_INTERVAL "$DEVICE_NAME" $DEVICE_IP $DEVICE_MAC);
             DATACOLECTOR_SERVICES=$(printf "${DATACOLECTOR_SERVICES}\n${DATACOLECTOR_SERVICES_PARTIAL}\n");
             COUNTER=$((COUNTER+1));
         done;
@@ -65,6 +62,8 @@ function generate_docker_compose_datacolector()
 
 function render_docker_compose_datacolector_sample()
 {
+    local INFLUXDB_URL='http:\/\/localhost:8086';
+
     # render DATACOLECTOR_SERVICES_PARTIAL
     local DATACOLECTOR_SERVICES='';
     local DATACOLECTOR_SERVICES_RENDERED='';

@@ -7,8 +7,6 @@ x-function: &datacolector-function
     context: ./datacolector
     dockerfile: Dockerfile
   restart: always
-  depends_on:
-    - influxdb
   volumes:
     - ./datacolector/conf/telegraf-smartplug.conf:/etc/telegraf/telegraf.conf:ro
   networks:
