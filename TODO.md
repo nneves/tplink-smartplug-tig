@@ -1,8 +1,8 @@
 # TODO List
 
 * [x] Run docker container to simulate a smartplug
-* [ ] Grafana initialization should allow to import base Graphs
-* [ ] Grafana initialization: check for grafana first launch, setup initialization procedure to add user,pw
+* [x] Grafana initialization should allow to import base Graphs
+* [x] Grafana initialization: check for grafana first launch, setup initialization procedure to add user,pw
 * [ ] InfluxDB: set default policy to expire data
 * [ ] Linux service install script (sudo service smartplug start)
 * [ ] Smartplug update service, checks repor for updates, git pull and restart (explicit UPDATE flag required)
