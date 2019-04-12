@@ -8,6 +8,7 @@ import socket
 import argparse
 import sys
 import signal
+from datetime import datetime
 from struct import pack
 
 def signal_handler(sig, frame):
@@ -53,14 +54,21 @@ def decrypt(string):
 		result += chr(a)
 	return result
 
+# Generate energy values based on time
+now = datetime.now()
+minutes = now.strftime("%M")
+int_current_ma = int(minutes)*10
+int_voltage_mv = int(240985)
+int_power_mw = int_voltage_mv*int_current_ma/1000
+
 port = 9999
 error = '{"error":"unkown command"}'
 # ./tplink_smartplug.py -t 127.0.0.1 -c info
 info = '{"system":{"get_sysinfo":{"sw_ver":"1.5.4 Build 180815 Rel.121440","hw_ver":"2.0","type":"IOT.SMARTPLUGSWITCH","model":"HS110(EU)","mac":"11:22:33:44:55:66","dev_name":"Smart Wi-Fi Plug With Energy Monitoring","alias":"Smartplug Emulator","relay_state":1,"on_time":97515,"active_mode":"none","feature":"TIM:ENE","updating":0,"icon_hash":"","rssi":-62,"led_off":0,"longitude_i":-79362,"latitude_i":370122,"hwId":"044A516EE63C875F9458DA2511223344","fwId":"00000000000000000000000000000000","deviceId":"80067C211A62B17A84E54282982127F311223344","oemId":"1998A14DAA86E4E001FD7CAF11223344","next_action":{"type":-1},"err_code":0}}}'
 # ./tplink_smartplug.py -t 127.0.0.1 -c energy
-energy = '{"emeter":{"get_realtime":{"voltage_mv":240985,"current_ma":671,"power_mw":95376,"total_wh":2602,"err_code":0}}}'
+energy = '{"emeter":{"get_realtime":{"voltage_mv":'+str(int_voltage_mv)+',"current_ma":'+str(int_current_ma)+',"power_mw":'+str(int_power_mw)+',"total_wh":12345,"err_code":0}}}'
 # ./tplink_smartplug.py -t 127.0.0.1 -j "{\"system\":{\"get_sysinfo\":null},\"emeter\":{\"get_realtime\":{}}}"
-info_energy = '{"system":{"get_sysinfo":{"sw_ver":"1.5.4 Build 180815 Rel.121440","hw_ver":"2.0","type":"IOT.SMARTPLUGSWITCH","model":"HS110(EU)","mac":"11:22:33:44:55:66","dev_name":"Smart Wi-Fi Plug With Energy Monitoring","alias":"Smartplug Emulator","relay_state":1,"on_time":97320,"active_mode":"none","feature":"TIM:ENE","updating":0,"icon_hash":"","rssi":-60,"led_off":0,"longitude_i":-79362,"latitude_i":370122,"hwId":"044A516EE63C875F9458DA2511223344","fwId":"00000000000000000000000000000000","deviceId":"80067C211A62B17A84E54282982127F311223344","oemId":"1998A14DAA86E4E001FD7CAF11223344","next_action":{"type":-1},"err_code":0}},"emeter":{"get_realtime":{"voltage_mv":240985,"current_ma":671,"power_mw":95376,"total_wh":2602,"err_code":0}}}'
+info_energy = '{"system":{"get_sysinfo":{"sw_ver":"1.5.4 Build 180815 Rel.121440","hw_ver":"2.0","type":"IOT.SMARTPLUGSWITCH","model":"HS110(EU)","mac":"11:22:33:44:55:66","dev_name":"Smart Wi-Fi Plug With Energy Monitoring","alias":"Smartplug Emulator","relay_state":1,"on_time":97320,"active_mode":"none","feature":"TIM:ENE","updating":0,"icon_hash":"","rssi":-60,"led_off":0,"longitude_i":-79362,"latitude_i":370122,"hwId":"044A516EE63C875F9458DA2511223344","fwId":"00000000000000000000000000000000","deviceId":"80067C211A62B17A84E54282982127F311223344","oemId":"1998A14DAA86E4E001FD7CAF11223344","next_action":{"type":-1},"err_code":0}},"emeter":{"get_realtime":{"voltage_mv":'+str(int_voltage_mv)+',"current_ma":'+str(int_current_ma)+',"power_mw":'+str(int_power_mw)+',"total_wh":12345,"err_code":0}}}'
 
 try:
 	# Create a TCP/IP socket
