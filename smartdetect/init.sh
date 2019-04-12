@@ -8,7 +8,6 @@ then
     source .env;
 fi
 source ./scripts/send_slack_message.sh;
-# source ./scripts/generate_docker_compose_datacolector.sh;
 # --------------------------------------------------------------------------
 
 IP_ADDRESS="${NETWORK_IP_ADDRESS:-"192.168.1.0/24"}";
@@ -134,6 +133,7 @@ do
                 printf "\e[33mUnable to find device SIGNATURE in $FILEDATA.\n\e[39m";
                 printf "\e[33mUpdating file with new device!\n\e[39m";
                 echo "$devicemac|$deviceip|$devicealias|$deviceinfo" >> $FILEDATA;
+                # TODO: launch "datacoletor" docker container
                 # generate_docker_compose_datacolector;
                 # DATACOLECTOR=$(cat docker-compose-datacolector.yml \
                 #         | grep "# SIGNATURE" \
