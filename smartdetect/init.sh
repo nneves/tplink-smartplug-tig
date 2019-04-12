@@ -8,20 +8,24 @@ then
     source .env;
 fi
 source ./scripts/send_slack_message.sh;
+source ./scripts/smartcolector_manager.sh;
 # --------------------------------------------------------------------------
-
-IP_ADDRESS="${NETWORK_IP_ADDRESS:-"192.168.1.0/24"}";
-START_IP="${NETWORK_IP_START_OCTET:-1}";
-END_IP="${NETWORK_IP_END_OCTET:-254}";
 FOLDERDATA="./SMARTPLUG/data/";
 FILEDATA="./SMARTPLUG/data/device.list";
 IPLIST="./scripts/logs/iplist.log";
 PROBELIST="./scripts/logs/probelist.log";
 DEVICELIST="./scripts/logs/devicelist.log";
 
+# ARGUMENTS
 SCAN_INTERVAL="${SCAN_INTERVAL:-250}"
-
 NC_TIMEOUT="${NC_TIMEOUT:-30}"
+IP_ADDRESS="${NETWORK_IP_ADDRESS:-"192.168.1.0/24"}";
+START_IP="${NETWORK_IP_START_OCTET:-1}";
+END_IP="${NETWORK_IP_END_OCTET:-254}";
+
+DEVICE_HOST_NAME="${DEVICE_HOST_NAME:-'Smartplug'}";
+DEVICE_INFLUXDB="${DEVICE_INFLUXDB:-'http://localhost:8086'}";
+DEVICE_INTERVAL="${DEVICE_INTERVAL:-'10s'}";
 
 # --------------------------------------------------------------------------
 # main

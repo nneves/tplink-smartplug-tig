@@ -8,7 +8,7 @@ then
     source .env;
 fi
 source ./scripts/send_slack_message.sh;
-
+source ./scripts/smartcolector_manager.sh;
 # --------------------------------------------------------------------------
 # constants
 # --------------------------------------------------------------------------
@@ -293,22 +293,6 @@ then
     docker-compose build;
     # DataCollector (telegraf specific containers)
     (cd smartcolector && docker build -t smartplug-colector .);
-    # INFLUXDB="http://$HOST_IP_ADDRESS:8086"
-    # DEVICE_INTERVAL="10s";
-    # #DEVICE_NAME="Smartplug Device";
-    # DEVICE_NAME="Smartplug Emulator";
-    # #DEVICE_IP="192.168.1.65";
-    # DEVICE_IP="192.168.1.80";
-    # STR_DEVICE_MAC="11:22:33:44";
-    # docker run --rm \
-    #     --hostname "$HOST_NAME" \
-    #     --env STR_INFLUXDB="$INFLUXDB" \
-    #     --env STR_DEVICE_INTERVAL="$DEVICE_INTERVAL" \
-    #     --env STR_DEVICE_NAME="$DEVICE_NAME" \
-    #     --env STR_DEVICE_IP="$DEVICE_IP" \
-    #     --env STR_DEVICE_MAC="$DEVICE_MAC" \
-    #     --volume "$PWD/smartcolector/conf/telegraf-smartplug.conf:/etc/telegraf/telegraf.conf:ro" \
-    #     --name smartplug-colector-02 smartplug-colector;
 fi
 
 # simulator (launches a docker container with a restapi to simulate the smartplug device)
@@ -330,14 +314,21 @@ then
     # launch InfraStructure (InfluxDB+Grafana)
     docker-compose up -d;
     # launch DataCollector (telegraf specific containers)
-    ### TODO:
+    datacolector_terminate_all_devices;
+    datacolector_launch_all_devices "$HOST_NAME" "http://$HOST_IP_ADDRESS:8086" "10s";
     # launch scripts
     ### TODO: fix
-    # SCAN_INTERVAL=30 NC_TIMEOUT=15 NETWORK_IP_START_OCTET=1 NETWORK_IP_END_OCTET=254 \
-    #     ./smartdetect/init.sh > ./scripts/logs/smartdetect.log 2>&1 &
-    # JOB_PID=$!;
-    # echo "$JOB_PID" > ./scripts/pids/smartdetect.pid;
-    # echo "Launched script: smartdetect";
+    SCAN_INTERVAL=30 \
+    NC_TIMEOUT=15 \
+    NETWORK_IP_START_OCTET=1 \
+    NETWORK_IP_END_OCTET=254 \
+    DEVICE_HOST_NAME="$HOST_NAME" \
+    DEVICE_INFLUXDB="http://$HOST_IP_ADDRESS:8086" \
+    DEVICE_INTERVAL="10s" \
+        ./smartdetect/init.sh > ./scripts/logs/smartdetect.log 2>&1 &
+    JOB_PID=$!;
+    echo "$JOB_PID" > ./scripts/pids/smartdetect.pid;
+    echo "Launched script: smartdetect";
     ### TODO: fix
     # ./smartmonitor/init.sh > ./scripts/logs/smartmonitor.log 2>&1 &
     # JOB_PID=$!;
@@ -424,7 +415,7 @@ then
     ## InfraStructure (InfluxDB+Grafana)
     docker-compose down;
     ## DataCollector (telegraf specific containers)
-    ### TODO:
+    datacolector_terminate_all_devices;
     # send slack notification
     send_slack_message "Stop Smart Wi-Fi Plug Energy Monitoring System" "" $MESSAGE_COLOR_RED;
     # stop scritps
