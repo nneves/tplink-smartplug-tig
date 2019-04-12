@@ -8,13 +8,13 @@ then
     source .env;
 fi
 source ./scripts/send_slack_message.sh;
-source ./scripts/generate_docker_compose_datacolector.sh;
+# source ./scripts/generate_docker_compose_datacolector.sh;
 # --------------------------------------------------------------------------
 
 IP_ADDRESS="${NETWORK_IP_ADDRESS:-"192.168.1.0/24"}";
 START_IP="${NETWORK_IP_START_OCTET:-1}";
 END_IP="${NETWORK_IP_END_OCTET:-254}";
-FILEDATA="./smartdetect/data/device.list";
+FILEDATA="./SMARTPLUG/data/device.list";
 IPLIST="./scripts/logs/iplist.log";
 PROBELIST="./scripts/logs/probelist.log";
 DEVICELIST="./scripts/logs/devicelist.log";
@@ -129,16 +129,16 @@ do
                 printf "\e[33mUnable to find device SIGNATURE in $FILEDATA.\n\e[39m";
                 printf "\e[33mUpdating file with new device!\n\e[39m";
                 echo "$devicemac|$deviceip|$devicealias|$deviceinfo" >> $FILEDATA;
-                generate_docker_compose_datacolector;
-                DATACOLECTOR=$(cat docker-compose-datacolector.yml \
-                        | grep "# SIGNATURE" \
-                        | sed -e 's/# SIGNATURE://g' \
-                        | sed -e 's/]//g' \
-                        | sed -e 's/]//g' \
-                        | grep "$devicemac|$deviceip|$devicealias" \
+                # generate_docker_compose_datacolector;
+                # DATACOLECTOR=$(cat docker-compose-datacolector.yml \
+                #         | grep "# SIGNATURE" \
+                #         | sed -e 's/# SIGNATURE://g' \
+                #         | sed -e 's/]//g' \
+                #         | sed -e 's/]//g' \
+                #         | grep "$devicemac|$deviceip|$devicealias" \
                         | cut -d '|' -f 4);
                 printf "\e[33mLaunch docker container for: $DATACOLECTOR!\n\e[39m";
-                docker-compose -p smartplug -f docker-compose-datacolector.yml up -d $DATACOLECTOR;
+                # docker-compose -p smartplug -f docker-compose-datacolector.yml up -d $DATACOLECTOR;
                 send_slack_message "Found new smartplug device:" "$devicemac\t$deviceip\t$devicealias" $MESSAGE_COLOR_BLUE;
                 printf "\e[33m#------------------------------------------------------------\e[39m\n";
             fi;
