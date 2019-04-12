@@ -70,6 +70,7 @@ services:
   # required to restart docker containers on healthcheck failure:
   # https://stackoverflow.com/questions/47088261/restarting-an-unhealthy-docker-container-based-on-healthcheck
   autoheal:
+    container_name: autoheal
     restart: always
     image: willfarrell/autoheal
     environment:
