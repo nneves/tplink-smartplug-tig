@@ -316,8 +316,27 @@ then
     # launch DataCollector (telegraf specific containers)
     datacolector_terminate_all_devices;
     datacolector_launch_all_devices "$HOST_NAME" "http://$HOST_IP_ADDRESS:8086" "10s";
-    # launch scripts
-    ### TODO: fix
+
+    # stop scritps
+    touch ./scripts/pids/smartdetect.pid;
+    JOB_PID=$(cat ./scripts/pids/smartdetect.pid);
+    if [[ -n "$JOB_PID" ]]
+    then
+        echo "Terminate script: smartdetect";
+        kill -9 $JOB_PID;
+        echo "" > ./scripts/pids/smartdetect.pid;
+    fi;
+    touch ./scripts/pids/smartmonitor.pid;
+    JOB_PID=$(cat ./scripts/pids/smartmonitor.pid);
+    if [[ -n "$JOB_PID" ]]
+    then
+        echo "Terminate script: smartmonitor";
+        kill -9 $JOB_PID;
+        echo "" > ./scripts/pids/smartmonitor.pid;
+    fi;
+
+    # launch smartdetect
+    echo "Launching smartdetect";
     SCAN_INTERVAL=30 \
         NC_TIMEOUT=15 \
         NETWORK_IP_START_OCTET=1 \
@@ -328,12 +347,13 @@ then
         ./smartdetect/init.sh > ./scripts/logs/smartdetect.log 2>&1 &
     JOB_PID=$!;
     echo "$JOB_PID" > ./scripts/pids/smartdetect.pid;
-    echo "Launched script: smartdetect";
-    ### TODO: fix
-    # ./smartmonitor/init.sh > ./scripts/logs/smartmonitor.log 2>&1 &
-    # JOB_PID=$!;
-    # echo "$JOB_PID" > ./scripts/pids/smartmonitor.pid;
-    # echo "Launched script: smartmonitor";
+
+    # launch smartmonitor
+    echo "Launching smartmonitor";
+    ./smartmonitor/init.sh > ./scripts/logs/smartmonitor.log 2>&1 &
+    JOB_PID=$!;
+    echo "$JOB_PID" > ./scripts/pids/smartmonitor.pid;
+
     # slack notification
     send_slack_message "Start Smart Wi-Fi Plug Energy Monitoring System" "" $MESSAGE_COLOR_GREEN;
 fi

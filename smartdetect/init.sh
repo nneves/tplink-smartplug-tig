@@ -137,16 +137,9 @@ do
                 printf "\e[33mUnable to find device SIGNATURE in $FILEDATA.\n\e[39m";
                 printf "\e[33mUpdating file with new device!\n\e[39m";
                 echo "$devicemac|$deviceip|$devicealias|$deviceinfo" >> $FILEDATA;
-                # TODO: launch "datacoletor" docker container
-                # generate_docker_compose_datacolector;
-                # DATACOLECTOR=$(cat docker-compose-datacolector.yml \
-                #         | grep "# SIGNATURE" \
-                #         | sed -e 's/# SIGNATURE://g' \
-                #         | sed -e 's/]//g' \
-                #         | sed -e 's/]//g' \
-                #         | grep "$devicemac|$deviceip|$devicealias" \
-                #        | cut -d '|' -f 4);
-                printf "\e[33mLaunch docker container for: $DATACOLECTOR!\n\e[39m";
+                # launch "datacoletor" docker container
+                datacolector_launch_device $DEVICE_HOST_NAME $DEVICE_INFLUXDB $DEVICE_INTERVAL "$devicealias" $deviceip $devicemac;
+                printf "\e[33mLaunch docker container for: $DEVICE_HOST_NAME $DEVICE_INFLUXDB $DEVICE_INTERVAL "$devicealias" $deviceip $devicemac!\n\e[39m";
                 # docker-compose -p smartplug -f docker-compose-datacolector.yml up -d $DATACOLECTOR;
                 send_slack_message "Found new smartplug device:" "$devicemac\t$deviceip\t$devicealias" $MESSAGE_COLOR_BLUE;
                 printf "\e[33m#------------------------------------------------------------\e[39m\n";
