@@ -14,6 +14,7 @@ source ./scripts/send_slack_message.sh;
 IP_ADDRESS="${NETWORK_IP_ADDRESS:-"192.168.1.0/24"}";
 START_IP="${NETWORK_IP_START_OCTET:-1}";
 END_IP="${NETWORK_IP_END_OCTET:-254}";
+FOLDERDATA="./SMARTPLUG/data/";
 FILEDATA="./SMARTPLUG/data/device.list";
 IPLIST="./scripts/logs/iplist.log";
 PROBELIST="./scripts/logs/probelist.log";
@@ -30,6 +31,10 @@ NC_TIMEOUT="${NC_TIMEOUT:-30}"
 printf "\e[36m#------------------------------------------------------------\e[39m\n";
 printf "\e[36mTP-LINK HS110 Smart Wi-Fi Plug With Energy Monitoring\e[39m\n";
 printf "\e[36m#------------------------------------------------------------\e[39m\n";
+
+# folder init
+mkdir -p $FOLDERDATA;
+touch $FILEDATA;
 
 while true;
 do
@@ -136,7 +141,7 @@ do
                 #         | sed -e 's/]//g' \
                 #         | sed -e 's/]//g' \
                 #         | grep "$devicemac|$deviceip|$devicealias" \
-                        | cut -d '|' -f 4);
+                #        | cut -d '|' -f 4);
                 printf "\e[33mLaunch docker container for: $DATACOLECTOR!\n\e[39m";
                 # docker-compose -p smartplug -f docker-compose-datacolector.yml up -d $DATACOLECTOR;
                 send_slack_message "Found new smartplug device:" "$devicemac\t$deviceip\t$devicealias" $MESSAGE_COLOR_BLUE;
