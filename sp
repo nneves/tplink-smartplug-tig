@@ -319,12 +319,12 @@ then
     # launch scripts
     ### TODO: fix
     SCAN_INTERVAL=30 \
-    NC_TIMEOUT=15 \
-    NETWORK_IP_START_OCTET=1 \
-    NETWORK_IP_END_OCTET=254 \
-    DEVICE_HOST_NAME="$HOST_NAME" \
-    DEVICE_INFLUXDB="http://$HOST_IP_ADDRESS:8086" \
-    DEVICE_INTERVAL="10s" \
+        NC_TIMEOUT=15 \
+        NETWORK_IP_START_OCTET=1 \
+        NETWORK_IP_END_OCTET=254 \
+        DEVICE_HOST_NAME="$HOST_NAME" \
+        DEVICE_INFLUXDB="http://$HOST_IP_ADDRESS:8086" \
+        DEVICE_INTERVAL="10s" \
         ./smartdetect/init.sh > ./scripts/logs/smartdetect.log 2>&1 &
     JOB_PID=$!;
     echo "$JOB_PID" > ./scripts/pids/smartdetect.pid;
