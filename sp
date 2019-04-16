@@ -387,31 +387,26 @@ fi
 if [[ "$LOGS_SMARTCOLECTOR" = "1" ]]
 then
     echo "------------------------------------------------------------";
-    echo "[LOGS_SMARTCOLECTOR] Attach to services logs-smartcolector";
+    echo "[LOGS_SMARTCOLECTOR] get service logs: logs-smartcolector";
     echo "------------------------------------------------------------";
-    ### TODO:
-    # (docker ps --filter "name=datacolector" --format "{{.Names}}" | sort) | {
-    #     while IFS= read -r telegraf
-    #     do
-    #         echo "------------------------------------------------------------";
-    #         SIGNATURE=$(cat docker-compose-datacolector.yml \
-    #             | grep "# SIGNATURE" \
-    #             | sed -e 's/# SIGNATURE://g' \
-    #             | grep "$telegraf");
-    #         echo "$telegraf: $SIGNATURE";
-    #         echo "------------------------------------------------------------";
-    #         docker-compose -p smartplug -f docker-compose-datacolector.yml logs $telegraf | tail -n 50;
-    #         echo "------------------------------------------------------------";
-    #         echo "";
-    #     done;
-    # }
+    (docker ps --filter "name=smartplug-colector" --format "{{.Names}}" | sort) | {
+        while IFS= read -r telegraf
+        do
+            echo "------------------------------------------------------------";
+            echo "=> LOGS $telegraf";
+            echo "------------------------------------------------------------";
+            docker logs $telegraf --tail 20;
+            echo "------------------------------------------------------------";
+            echo "";
+        done;
+    }
 fi
 
 # docker-compose logs
 if [[ "$LOGS_SMARTDETECT" = "1" ]]
 then
     echo "------------------------------------------------------------";
-    echo "[LOGS_SMARTDETECT] Attach to services logs-smartdetect";
+    echo "[LOGS_SMARTDETECT] get service logs: logs-smartdetect";
     echo "------------------------------------------------------------";
     tail -f ./scripts/logs/smartdetect.log;
 fi
@@ -420,7 +415,7 @@ fi
 if [[ "$LOGS_SMARTMONITOR" = "1" ]]
 then
     echo "------------------------------------------------------------";
-    echo "[LOGS_SMARTMONITOR] Attach to services logs-smartmonitor";
+    echo "[LOGS_SMARTMONITOR] get service logs: logs-smartmonitor";
     echo "------------------------------------------------------------";
     tail -f ./scripts/logs/smartmonitor.log;
 fi
