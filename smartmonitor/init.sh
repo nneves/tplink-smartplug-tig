@@ -14,6 +14,18 @@ fi
 source ./scripts/send_slack_message.sh;
 # --------------------------------------------------------------------------
 
+# - ARG1: CONTAINER_NAME: ("smartplug-colector-80")
+# - ARG2: ENV_VAR_NAME: ("STR_DEVICE_IP")
+function get_docker_container_env_data()
+{
+    local FORMAT='{{range $index, $value := .Config.Env}}';
+    FORMAT=$FORMAT'{{if eq (index (split $value "=") 0) "'$2'" }}';
+    FORMAT=$FORMAT'{{range $i, $part := (split $value "=")}}{{if gt $i 1}}{{print "="}}{{end}}';
+    FORMAT=$FORMAT'{{if gt $i 0}}{{print $part}}{{end}}{{end}}{{end}}{{end}}';
+    local result=$(docker inspect --format "$FORMAT" $1);
+    echo "$result";
+}
+
 # --------------------------------------------------------------------------
 # main
 # --------------------------------------------------------------------------
@@ -25,46 +37,50 @@ do
     (docker ps --filter "name=smartplug-colector" --format "{{.Names}}" | sort) | {
         while IFS= read -r telegraf
         do
-            LOGS_ERROR_INFLUXDB_NO_CONNECTION=$(docker logs $telegraf | tail -n 100 | grep "$ERROR_INFLUXDB_NO_CONNECTION");
-            COUNT_ERROR_INFLUXDB_NO_CONNECTION=$(echo "$LOGS_ERROR_INFLUXDB_NO_CONNECTION" | wc -l);
-            echo "$telegraf: [COUNT_ERROR_INFLUXDB_NO_CONNECTION $COUNT_ERROR_INFLUXDB_NO_CONNECTION]";
+            LOGS_LAST_5MINUTES=$(docker logs $telegraf --since 5m 2>&1);
+
+            LOGS_ERROR_INFLUXDB_NO_CONNECTION=$(echo "$LOGS_LAST_5MINUTES" | grep "$ERROR_INFLUXDB_NO_CONNECTION");
+            COUNT_ERROR_INFLUXDB_NO_CONNECTION=$(echo "$LOGS_ERROR_INFLUXDB_NO_CONNECTION" | wc -l | sed -e "s/ //g");
+            echo "$telegraf: [COUNT_ERROR_INFLUXDB_NO_CONNECTION    = $COUNT_ERROR_INFLUXDB_NO_CONNECTION]";
+
+            LOGS_INFLUXDB_INTERVAL_MESSAGE=$(echo "$LOGS_LAST_5MINUTES" | grep "$ERROR_INFLUXDB_INTERVAL_MESSAGE");
+            COUNT_ERROR_INFLUXDB_INTERVAL_MESSAGE=$(echo "$LOGS_INFLUXDB_INTERVAL_MESSAGE" | wc -l | sed -e "s/ //g");
+            echo "$telegraf: [COUNT_ERROR_INFLUXDB_INTERVAL_MESSAGE = $COUNT_ERROR_INFLUXDB_INTERVAL_MESSAGE]";
+
             # check if count >= 20
-            if [ $COUNT_ERROR_INFLUXDB_NO_CONNECTION -ge 20 ]
+            if [ $COUNT_ERROR_INFLUXDB_NO_CONNECTION -ge 10 ] || [ $COUNT_ERROR_INFLUXDB_INTERVAL_MESSAGE -ge 10 ]
             then
+                # get docker container env var data
+                STR_DEVICE_MAC=$(get_docker_container_env_data "$telegraf" "STR_DEVICE_MAC");
+                echo "STR_DEVICE_MAC=$STR_DEVICE_MAC";
+                STR_DEVICE_IP=$(get_docker_container_env_data "$telegraf" "STR_DEVICE_IP");
+                echo "STR_DEVICE_IP=$STR_DEVICE_IP";
+                STR_DEVICE_NAME=$(get_docker_container_env_data "$telegraf" "STR_DEVICE_NAME");
+                echo "STR_DEVICE_NAME=$STR_DEVICE_NAME";
+                # get device.list line number
+                DEVICE_METADATA=$STR_DEVICE_MAC"|"$STR_DEVICE_IP"|"$STR_DEVICE_NAME;
+                DEVICE_METADATA_STR=$STR_DEVICE_MAC"\t"$STR_DEVICE_IP"\t"$STR_DEVICE_NAME;
+                echo "DEVICE_METADATA=$DEVICE_METADATA";
+                DEVICE_LINE=$(cat $DEVICE_LIST_PATH | grep -n "$DEVICE_METADATA" | grep -Eo '^[^:]+');
+                echo "DEVICE_LINE=$DEVICE_LINE";
+                sed -i -e "${DEVICE_LINE}d" $DEVICE_LIST_PATH;
                 echo "Terminate $telegraf due to read response errors.";
                 docker stop $telegraf;
-                # get device.list line number
-                # TODO: FIX
-                # DEVICE_METADATA=$(echo "$SIGNATURE" | sed -e "s/\  //g" | sed -e "s/\ //" | sed -e "s/\[//g" | sed -e "s/\]//g" | sed -e "s/|$telegraf//g");
-                # echo "DEVICE_METADATA=$DEVICE_METADATA";
-                # DEVICE_LINE=$(cat $DEVICE_LIST_PATH | grep -n "$DEVICE_METADATA" | grep -Eo '^[^:]+');
-                # echo "DEVICE_LINE=$DEVICE_LINE";
-                # sed -i -e "${DEVICE_LINE}d" $DEVICE_LIST_PATH;
-                send_slack_message "Remove device due to read response errors: $COUNT_ERROR_INFLUXDB_NO_CONNECTION" \
-                    "$telegraf" \
-                    $MESSAGE_COLOR_YELLOW;
-            fi;
 
-            LOGS_INFLUXDB_INTERVAL_MESSAGE=$(docker logs $telegraf | tail -n 100 | grep "$INFLUXDB_INTERVAL_MESSAGE");
-            COUNT_INFLUXDB_INTERVAL_MESSAGE=$(echo "$LOGS_INFLUXDB_INTERVAL_MESSAGE" | wc -l);
-            echo "$telegraf: [COUNT_INFLUXDB_INTERVAL_MESSAGE $COUNT_INFLUXDB_INTERVAL_MESSAGE]";
-            # check if count >= 20
-            if [ $COUNT_INFLUXDB_INTERVAL_MESSAGE -ge 20 ]
-            then
-                echo "Terminate $telegraf due to read response errors.";
-                docker stop $telegraf;
-                # get device.list line number
-                # TODO: FIX
-                # DEVICE_METADATA=$(echo "$SIGNATURE" | sed -e "s/\  //g" | sed -e "s/\ //" | sed -e "s/\[//g" | sed -e "s/\]//g" | sed -e "s/|$telegraf//g");
-                # echo "DEVICE_METADATA=$DEVICE_METADATA";
-                # DEVICE_LINE=$(cat $DEVICE_LIST_PATH | grep -n "$DEVICE_METADATA" | grep -Eo '^[^:]+');
-                # echo "DEVICE_LINE=$DEVICE_LINE";
-                # sed -i -e "${DEVICE_LINE}d" $DEVICE_LIST_PATH;
-                send_slack_message "Remove device due to read response errors: $COUNT_INFLUXDB_INTERVAL_MESSAGE" \
-                    "$telegraf" \
-                    $MESSAGE_COLOR_YELLOW;
+                if [ $COUNT_ERROR_INFLUXDB_NO_CONNECTION -ge 10 ]
+                then
+                    send_slack_message "Remove device due to errors" \
+                        "INFLUXDB_NO_CONNECTION=$COUNT_ERROR_INFLUXDB_NO_CONNECTION\n$DEVICE_METADATA_STR" \
+                        $MESSAGE_COLOR_YELLOW;
+                fi;
+                if [ $COUNT_ERROR_INFLUXDB_INTERVAL_MESSAGE -ge 10 ]
+                then
+                    send_slack_message "Remove device due to errors" \
+                        "INFLUXDB_INTERVAL_MESSAGE=$COUNT_ERROR_INFLUXDB_INTERVAL_MESSAGE\n$DEVICE_METADATA_STR" \
+                        $MESSAGE_COLOR_YELLOW;
+                fi;
+                echo "MESSAGE_COLOR_YELLOW=$MESSAGE_COLOR_YELLOW";
             fi;
-
         done;
     }
     end=`date +%s`;
