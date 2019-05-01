@@ -36,19 +36,20 @@ echo "------------------------------------------------------------";
 if [[ $# -eq 0 || "$1" =  "help" || "$1" =  "--help" ]]
 then
     echo "Usage: $0 [Options]";
-    echo "config";
-    echo "reset-data-influxdb";
-    echo "reset-data-grafana";
     echo "build";
-    echo "up";
+    echo "config";
     echo "down";
+    echo "grafana";
+    echo "initialize";
+    echo "list";
     echo "logs-smartcolector";
     echo "logs-smartdetect";
     echo "logs-smartmonitor";
-    echo "grafana";
-    echo "list";
     echo "provisioning";
+    echo "reset-data-influxdb";
+    echo "reset-data-grafana";
     echo "simulator";
+    echo "up";
     exit $RETURN_ERROR;
 fi
 
@@ -141,6 +142,13 @@ if [[ $(echo $ARGS_LINES | grep "provisioning") ]]
 then
     echo "Option: provisioning [ACTIVE]";
     PROVISIONING=1;
+fi
+
+INITIALIZE=0;
+if [[ $(echo $ARGS_LINES | grep "initialize") ]]
+then
+    echo "Option: initialize [ACTIVE]";
+    INITIALIZE=1;
 fi
 
 SIMULATOR=0;
@@ -289,6 +297,49 @@ then
     docker run \
         --volume "$PWD/grafana/data/grafana.db:/grafana.db" \
         --rm -it nouchka/sqlite3 /grafana.db 'DELETE FROM `dashboard_provisioning` WHERE id>0;';
+fi
+
+# initialize
+if [[ "$INITIALIZE" = "1" ]]
+then
+    echo "------------------------------------------------------------";
+    echo "InfluxDB initialization";
+    echo "------------------------------------------------------------";
+    # stop/reset all docker services
+    ## InfraStructure (InfluxDB+Grafana)
+    docker-compose down;
+    ## DataCollector (telegraf specific containers)
+    datacolector_terminate_all_devices;
+
+    # launch influxdb service
+    docker-compose up -d influxdb;
+    # execute SQL commands to initalize database
+    echo "------------------------------------------------------------";
+    echo "CREATE DATABASE smartplug";
+    docker-compose run influxdb influx -host influxdb -database smartplug -execute 'CREATE DATABASE "smartplug"';
+    echo "------------------------------------------------------------";
+    docker-compose run influxdb influx -host influxdb -database smartplug -execute 'SHOW DATABASES';
+    echo "------------------------------------------------------------";
+    echo "CREATE RETENTION POLICY one_hour";
+    docker-compose run --rm influxdb influx -host influxdb -database smartplug -execute 'CREATE RETENTION POLICY "one_hour" ON "smartplug" DURATION 1h REPLICATION 1';
+    echo "CREATE RETENTION POLICY one_day";
+    docker-compose run --rm influxdb influx -host influxdb -database smartplug -execute 'CREATE RETENTION POLICY "one_day" ON "smartplug" DURATION 1d REPLICATION 1';
+    echo "CREATE RETENTION POLICY one_week";
+    docker-compose run --rm influxdb influx -host influxdb -database smartplug -execute 'CREATE RETENTION POLICY "one_week" ON "smartplug" DURATION 1w REPLICATION 1';
+    echo "CREATE RETENTION POLICY two_weeks";
+    docker-compose run --rm influxdb influx -host influxdb -database smartplug -execute 'CREATE RETENTION POLICY "two_weeks" ON "smartplug" DURATION 2w REPLICATION 1';
+    echo "CREATE RETENTION POLICY one_month";
+    docker-compose run --rm influxdb influx -host influxdb -database smartplug -execute 'CREATE RETENTION POLICY "one_month" ON "smartplug" DURATION 4w REPLICATION 1';
+    echo "CREATE RETENTION POLICY three_months";
+    docker-compose run --rm influxdb influx -host influxdb -database smartplug -execute 'CREATE RETENTION POLICY "three_months" ON "smartplug" DURATION 12w REPLICATION 1 DEFAULT';
+    echo "CREATE RETENTION POLICY six_months";
+    docker-compose run --rm influxdb influx -host influxdb -database smartplug -execute 'CREATE RETENTION POLICY "six_months" ON "smartplug" DURATION 26w REPLICATION 1';
+    echo "CREATE RETENTION POLICY one_year";
+    docker-compose run --rm influxdb influx -host influxdb -database smartplug -execute 'CREATE RETENTION POLICY "one_year" ON "smartplug" DURATION 52w REPLICATION 1';
+    echo "------------------------------------------------------------";
+    docker-compose run --rm influxdb influx -host influxdb -database smartplug -execute 'SHOW RETENTION POLICIES ON smartplug';
+    echo "------------------------------------------------------------";
+    docker-compose down;
 fi
 
 # build

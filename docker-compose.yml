@@ -21,20 +21,6 @@ services:
     networks:
       - smartplug-network
 
-  # # Define a service for using the influx CLI tool.
-  # # docker-compose -p smartplug run influxdb-cli
-  # influxdb-cli:
-  #   image: influxdb:1.7
-  #   container_name: influxdb-cli
-  #   entrypoint:
-  #     - influx
-  #     - -host
-  #     - influxdb
-  #   depends_on:
-  #     - influxdb
-  #   networks:
-  #     - smartplug-network
-
   # Define a Chronograf service
   chronograf:
     image: chronograf:1.7

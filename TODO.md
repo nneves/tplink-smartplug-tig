@@ -6,7 +6,8 @@
 * [ ] Fix: datacollector from emulator should return error when no emulator data returns
 * [ ] Create bash script library to add/remove data from SMARTPLUG/device.list file
 * [ ] Post slack message in the smartcolector_manager script, when adding or removing a datacolector container
-* [ ] InfluxDB: set default policy to expire data
+* [x] InfluxDB: set default policy to expire data
+* [ ] InfluxDB: set Continuous Queries to compact data into another DB
 * [ ] Linux service install script (sudo service smartplug start)
 * [ ] Smartplug update service, checks repo for updates, git pull and restart (explicit UPDATE flag required)
 * [ ] Smartplug.sh: set option to configure .env file (SLACK_WEBHOOK, ENERGY_COST_PER_KWH, etc)
