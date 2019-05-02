@@ -297,6 +297,23 @@ then
     docker run \
         --volume "$PWD/grafana/data/grafana.db:/grafana.db" \
         --rm -it nouchka/sqlite3 /grafana.db 'DELETE FROM `dashboard_provisioning` WHERE id>0;';
+    # add random api token directly from SQL into sqlite (required for grafana-reports, grafana-reverse-proxy)
+    # note: same operation can be done using CURL with the grafana api, but would still require user credentials to make the requests!
+    echo "------------------------------------------------------------";
+    # TODO: random generate the API_KEY_DB+API_TOKEN (understand the releation between both)
+    API_KEY_DB="a8a4d0b05f3c8b9c7edbaac876828947ac09f11ac1d5fae0ff42d2b914619103e0b40fdd210fa1a1399d4b92c263b04020b6";
+    API_TOKEN="eyJrIjoiVzU0UUVpOGdWWmZiTXpac3lreVNIV2R0UnE4TjlSMFIiLCJuIjoicmVwb3J0ZXIiLCJpZCI6MX0=";
+    echo "GRAFANA_API_TOKEN=$API_TOKEN";
+    echo "------------------------------------------------------------";
+    docker run \
+        --volume "$PWD/grafana/data/grafana.db:/grafana.db" \
+        --rm -it nouchka/sqlite3 /grafana.db 'DELETE FROM `api_key` WHERE _rowid_ IN ("1");';
+    docker run \
+        --volume "$PWD/grafana/data/grafana.db:/grafana.db" \
+        --rm -it nouchka/sqlite3 /grafana.db 'INSERT INTO "api_key"("org_id","name","key","role","created","updated") VALUES (1,"reporter","'$API_KEY_DB'","Viewer","2019-05-01 12:00:00","2019-05-01 12:00:00");';
+    # replace nginx.conf proxy_pass authorization header
+    echo "update 'grafana-reverse-proxy' nginx configuration file with new api token: ./grafana-proxy/conf/nginx.conf";
+    sed -i 's/.*proxy_set_header Authorization "Bearer.*/            proxy_set_header Authorization "Bearer '$API_TOKEN'";/' ./grafana-proxy/conf/nginx.conf;
 fi
 
 # initialize

@@ -16,8 +16,20 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1555011441539,
-  "links": [],
+  "iteration": 1556813805894,
+  "links": [
+    {
+      "icon": "doc",
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "targetBlank": true,
+      "title": "SmartPlug Report",
+      "tooltip": "PDF Report",
+      "type": "link",
+      "url": "http://localhost:8686/api/v5/report/r7LagJ_mz"
+    }
+  ],
   "panels": [
     {
       "collapsed": false,
@@ -29,21 +41,23 @@
       },
       "id": 32,
       "panels": [],
-      "title": "Energy Monitor [BARS]",
+      "title": "Energy Monitor",
       "type": "row"
     },
     {
       "aliasColors": {
+        "Dishwasher": "#447ebc",
         "Kitchen Fridge;": "#1f78c1",
         "SevenPlug1": "#e0752d",
         "SevenPlug2": "#447ebc",
         "Smartplug": "#0a50a1"
       },
-      "bars": true,
+      "bars": false,
       "dashLength": 10,
       "dashes": false,
       "datasource": "InfluxDB-Smartplug",
-      "fill": 1,
+      "decimals": 0,
+      "fill": 3,
       "gridPos": {
         "h": 6,
         "w": 24,
@@ -55,13 +69,16 @@
         "alignAsTable": true,
         "avg": true,
         "current": true,
+        "hideEmpty": false,
+        "hideZero": false,
         "max": true,
         "min": true,
+        "rightSide": false,
         "show": true,
         "total": true,
         "values": true
       },
-      "lines": false,
+      "lines": true,
       "linewidth": 1,
       "links": [],
       "minSpan": 24,
@@ -72,10 +89,17 @@
       "renderer": "flot",
       "repeat": "devices",
       "repeatDirection": "h",
+      "scopedVars": {
+        "devices": {
+          "selected": false,
+          "text": "Dishwasher",
+          "value": "Dishwasher"
+        }
+      },
       "seriesOverrides": [
         {
           "alias": "/.*/i",
-          "color": "#705da0"
+          "color": "#1f78c1"
         }
       ],
       "spaceLength": 10,
@@ -98,10 +122,55 @@
               "type": "fill"
             }
           ],
+          "hide": false,
           "measurement": "exec_smartplug",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "emeter_get_realtime_power_mw"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "device_name",
+              "operator": "=~",
+              "value": "/^$devices$/"
+            }
+          ]
+        },
+        {
+          "alias": "$devices [NORM]",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval*5"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "previous"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "exec_smartplug",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "B",
           "resultFormat": "time_series",
           "select": [
             [
@@ -132,7 +201,7 @@
       "timeShift": null,
       "title": "SmartPlug - $devices",
       "tooltip": {
-        "shared": false,
+        "shared": true,
         "sort": 0,
         "value_type": "individual"
       },
@@ -168,20 +237,8 @@
       }
     },
     {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 7
-      },
-      "id": 21,
-      "panels": [],
-      "title": "Energy Monitor",
-      "type": "row"
-    },
-    {
       "aliasColors": {
+        "Dishwasher": "#447ebc",
         "Kitchen Fridge;": "#1f78c1",
         "SevenPlug1": "#e0752d",
         "SevenPlug2": "#447ebc",
@@ -191,20 +248,24 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "InfluxDB-Smartplug",
-      "fill": 1,
+      "decimals": 0,
+      "fill": 3,
       "gridPos": {
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 8
+        "y": 7
       },
-      "id": 10,
+      "id": 44,
       "legend": {
         "alignAsTable": true,
         "avg": true,
         "current": true,
+        "hideEmpty": false,
+        "hideZero": false,
         "max": true,
         "min": true,
+        "rightSide": false,
         "show": true,
         "total": true,
         "values": true
@@ -218,8 +279,17 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeat": "devices",
+      "repeat": null,
       "repeatDirection": "h",
+      "repeatIteration": 1556813805894,
+      "repeatPanelId": 2,
+      "scopedVars": {
+        "devices": {
+          "selected": false,
+          "text": "Kitchen Fridge",
+          "value": "Kitchen Fridge"
+        }
+      },
       "seriesOverrides": [
         {
           "alias": "/.*/i",
@@ -241,15 +311,60 @@
             },
             {
               "params": [
-                "linear"
+                "null"
               ],
               "type": "fill"
             }
           ],
+          "hide": false,
           "measurement": "exec_smartplug",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "emeter_get_realtime_power_mw"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "device_name",
+              "operator": "=~",
+              "value": "/^$devices$/"
+            }
+          ]
+        },
+        {
+          "alias": "$devices [NORM]",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval*5"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "previous"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "exec_smartplug",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "B",
           "resultFormat": "time_series",
           "select": [
             [
@@ -280,7 +395,395 @@
       "timeShift": null,
       "title": "SmartPlug - $devices",
       "tooltip": {
-        "shared": false,
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "mwatt",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {
+        "Dishwasher": "#447ebc",
+        "Kitchen Fridge;": "#1f78c1",
+        "SevenPlug1": "#e0752d",
+        "SevenPlug2": "#447ebc",
+        "Smartplug": "#0a50a1"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "InfluxDB-Smartplug",
+      "decimals": 0,
+      "fill": 3,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
+      "id": 45,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "hideEmpty": false,
+        "hideZero": false,
+        "max": true,
+        "min": true,
+        "rightSide": false,
+        "show": true,
+        "total": true,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "minSpan": 24,
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeat": null,
+      "repeatDirection": "h",
+      "repeatIteration": 1556813805894,
+      "repeatPanelId": 2,
+      "scopedVars": {
+        "devices": {
+          "selected": false,
+          "text": "Washing Machine",
+          "value": "Washing Machine"
+        }
+      },
+      "seriesOverrides": [
+        {
+          "alias": "/.*/i",
+          "color": "#1f78c1"
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "$devices",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval*5"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "exec_smartplug",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "emeter_get_realtime_power_mw"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "device_name",
+              "operator": "=~",
+              "value": "/^$devices$/"
+            }
+          ]
+        },
+        {
+          "alias": "$devices [NORM]",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval*5"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "previous"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "exec_smartplug",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "emeter_get_realtime_power_mw"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "device_name",
+              "operator": "=~",
+              "value": "/^$devices$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "SmartPlug - $devices",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "mwatt",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {
+        "Dishwasher": "#447ebc",
+        "Kitchen Fridge;": "#1f78c1",
+        "SevenPlug1": "#e0752d",
+        "SevenPlug2": "#447ebc",
+        "Smartplug": "#0a50a1"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "InfluxDB-Smartplug",
+      "decimals": 0,
+      "fill": 3,
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 19
+      },
+      "id": 46,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "hideEmpty": false,
+        "hideZero": false,
+        "max": true,
+        "min": true,
+        "rightSide": false,
+        "show": true,
+        "total": true,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "minSpan": 24,
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeat": null,
+      "repeatDirection": "h",
+      "repeatIteration": 1556813805894,
+      "repeatPanelId": 2,
+      "scopedVars": {
+        "devices": {
+          "selected": false,
+          "text": "Water Heater",
+          "value": "Water Heater"
+        }
+      },
+      "seriesOverrides": [
+        {
+          "alias": "/.*/i",
+          "color": "#1f78c1"
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "$devices",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval*5"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "exec_smartplug",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "emeter_get_realtime_power_mw"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "device_name",
+              "operator": "=~",
+              "value": "/^$devices$/"
+            }
+          ]
+        },
+        {
+          "alias": "$devices [NORM]",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval*5"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "previous"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "exec_smartplug",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "emeter_get_realtime_power_mw"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "device_name",
+              "operator": "=~",
+              "value": "/^$devices$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "SmartPlug - $devices",
+      "tooltip": {
+        "shared": true,
         "sort": 0,
         "value_type": "individual"
       },
@@ -321,7 +824,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 25
       },
       "id": 43,
       "panels": [],
@@ -345,7 +848,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 26
       },
       "id": 5,
       "legend": {
@@ -369,6 +872,13 @@
       "renderer": "flot",
       "repeat": "devices",
       "repeatDirection": "h",
+      "scopedVars": {
+        "devices": {
+          "selected": false,
+          "text": "Dishwasher",
+          "value": "Dishwasher"
+        }
+      },
       "seriesOverrides": [
         {
           "alias": "/.*/i",
@@ -390,7 +900,517 @@
             },
             {
               "params": [
-                "none"
+                "0"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "exec_smartplug",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "system_get_sysinfo_rssi"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "device_name",
+              "operator": "=~",
+              "value": "/^$devices$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": [
+        {
+          "colorMode": "ok",
+          "fill": false,
+          "line": true,
+          "op": "lt",
+          "value": -30,
+          "yaxis": "left"
+        },
+        {
+          "colorMode": "warning",
+          "fill": false,
+          "line": true,
+          "op": "lt",
+          "value": -50,
+          "yaxis": "left"
+        },
+        {
+          "colorMode": "critical",
+          "fill": false,
+          "line": true,
+          "op": "lt",
+          "value": -70,
+          "yaxis": "left"
+        }
+      ],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "SmartPlug Wifi RSSI - $devices",
+      "tooltip": {
+        "shared": false,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "dBm",
+          "label": "",
+          "logBase": 1,
+          "max": "-20",
+          "min": "-90",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {
+        "Kitchen Fridge;": "#1f78c1",
+        "SevenPlug1": "#e0752d",
+        "SevenPlug2": "#447ebc",
+        "Smartplug": "#0a50a1"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "InfluxDB-Smartplug",
+      "description": "Wifi Signal",
+      "fill": 1,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 33
+      },
+      "id": 47,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "max": true,
+        "min": true,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "minSpan": 24,
+      "nullPointMode": "null as zero",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeat": null,
+      "repeatDirection": "h",
+      "repeatIteration": 1556813805894,
+      "repeatPanelId": 5,
+      "scopedVars": {
+        "devices": {
+          "selected": false,
+          "text": "Kitchen Fridge",
+          "value": "Kitchen Fridge"
+        }
+      },
+      "seriesOverrides": [
+        {
+          "alias": "/.*/i",
+          "color": "#64b0c8"
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "$devices",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval*5"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "0"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "exec_smartplug",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "system_get_sysinfo_rssi"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "device_name",
+              "operator": "=~",
+              "value": "/^$devices$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": [
+        {
+          "colorMode": "ok",
+          "fill": false,
+          "line": true,
+          "op": "lt",
+          "value": -30,
+          "yaxis": "left"
+        },
+        {
+          "colorMode": "warning",
+          "fill": false,
+          "line": true,
+          "op": "lt",
+          "value": -50,
+          "yaxis": "left"
+        },
+        {
+          "colorMode": "critical",
+          "fill": false,
+          "line": true,
+          "op": "lt",
+          "value": -70,
+          "yaxis": "left"
+        }
+      ],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "SmartPlug Wifi RSSI - $devices",
+      "tooltip": {
+        "shared": false,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "dBm",
+          "label": "",
+          "logBase": 1,
+          "max": "-20",
+          "min": "-90",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {
+        "Kitchen Fridge;": "#1f78c1",
+        "SevenPlug1": "#e0752d",
+        "SevenPlug2": "#447ebc",
+        "Smartplug": "#0a50a1"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "InfluxDB-Smartplug",
+      "description": "Wifi Signal",
+      "fill": 1,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 40
+      },
+      "id": 48,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "max": true,
+        "min": true,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "minSpan": 24,
+      "nullPointMode": "null as zero",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeat": null,
+      "repeatDirection": "h",
+      "repeatIteration": 1556813805894,
+      "repeatPanelId": 5,
+      "scopedVars": {
+        "devices": {
+          "selected": false,
+          "text": "Washing Machine",
+          "value": "Washing Machine"
+        }
+      },
+      "seriesOverrides": [
+        {
+          "alias": "/.*/i",
+          "color": "#64b0c8"
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "$devices",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval*5"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "0"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "exec_smartplug",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "system_get_sysinfo_rssi"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "device_name",
+              "operator": "=~",
+              "value": "/^$devices$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": [
+        {
+          "colorMode": "ok",
+          "fill": false,
+          "line": true,
+          "op": "lt",
+          "value": -30,
+          "yaxis": "left"
+        },
+        {
+          "colorMode": "warning",
+          "fill": false,
+          "line": true,
+          "op": "lt",
+          "value": -50,
+          "yaxis": "left"
+        },
+        {
+          "colorMode": "critical",
+          "fill": false,
+          "line": true,
+          "op": "lt",
+          "value": -70,
+          "yaxis": "left"
+        }
+      ],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "SmartPlug Wifi RSSI - $devices",
+      "tooltip": {
+        "shared": false,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "dBm",
+          "label": "",
+          "logBase": 1,
+          "max": "-20",
+          "min": "-90",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {
+        "Kitchen Fridge;": "#1f78c1",
+        "SevenPlug1": "#e0752d",
+        "SevenPlug2": "#447ebc",
+        "Smartplug": "#0a50a1"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "InfluxDB-Smartplug",
+      "description": "Wifi Signal",
+      "fill": 1,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 47
+      },
+      "id": 49,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "max": true,
+        "min": true,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "minSpan": 24,
+      "nullPointMode": "null as zero",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeat": null,
+      "repeatDirection": "h",
+      "repeatIteration": 1556813805894,
+      "repeatPanelId": 5,
+      "scopedVars": {
+        "devices": {
+          "selected": false,
+          "text": "Water Heater",
+          "value": "Water Heater"
+        }
+      },
+      "seriesOverrides": [
+        {
+          "alias": "/.*/i",
+          "color": "#64b0c8"
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "$devices",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval*5"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "0"
               ],
               "type": "fill"
             }
@@ -500,9 +1520,7 @@
         "allValue": null,
         "current": {
           "text": "All",
-          "value": [
-            "$__all"
-          ]
+          "value": "$__all"
         },
         "datasource": "InfluxDB-Smartplug",
         "definition": "SHOW TAG VALUES ON \"smartplug\" FROM \"exec_smartplug\" WITH KEY = \"device_name\"",
@@ -526,7 +1544,7 @@
     ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-3h",
     "to": "now"
   },
   "timepicker": {
@@ -557,5 +1575,5 @@
   "timezone": "",
   "title": "SmartPlug",
   "uid": "r7LagJ_mz",
-  "version": 2
+  "version": 16
 }

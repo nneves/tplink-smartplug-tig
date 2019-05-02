@@ -1,7 +1,7 @@
 version: '2.3'
 
 services:
-  # Define a InfluxDB service
+  # InfluxDB service
   influxdb:
     image: influxdb:1.7
     container_name: influxdb
@@ -21,7 +21,7 @@ services:
     networks:
       - smartplug-network
 
-  # Define a Chronograf service
+  # Chronograf service
   chronograf:
     image: chronograf:1.7
     container_name: chronograf
@@ -29,14 +29,14 @@ services:
     volumes:
       - ./chronograf/data:/var/lib/chronograf
     ports:
-      - "8888:8888"
+      - "127.0.0.1:8888:8888"
     command: "chronograf --influxdb-url=http://influxdb:8086"
     depends_on:
       - influxdb
     networks:
       - smartplug-network
 
-  # Define a Grafana service
+  # Grafana service
   grafana:
     image: grafana/grafana:5.4.3
     container_name: grafana
@@ -50,6 +50,38 @@ services:
       - influxdb
     volumes:
       - ./grafana/data:/var/lib/grafana
+    networks:
+      - smartplug-network
+
+  # Grafana reverse proxy service
+  grafana-reverse-proxy:
+    image: nginx:latest
+    container_name: grafana-reverse-proxy
+    restart: always
+    volumes:
+      - "$PWD/grafana-proxy/conf/nginx.conf:/etc/nginx/nginx.conf:ro"
+    ports:
+      - "127.0.0.1:3003:3003"
+    depends_on:
+      - influxdb
+      - grafana
+    networks:
+      - smartplug-network
+
+  # Grafana-report service
+  grafana-reporter:
+    image: izakmarais/grafana-reporter
+    container_name: grafana-reporter
+    restart: always
+    entrypoint:
+      - /usr/local/bin/grafana-reporter
+      - -ip
+      - "grafana-reverse-proxy:3003"
+    ports:
+      - "127.0.0.1:8686:8686"
+    depends_on:
+      - influxdb
+      - grafana
     networks:
       - smartplug-network
 
