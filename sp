@@ -18,6 +18,7 @@ RETURN_ERROR=1;
 # system data files
 # --------------------------------------------------------------------------
 DEVICE_LIST_PATH="./SMARTPLUG/data/device.list";
+GRAFANA_APIKEY_TOKEN="./grafana/apikey-generator/env/env.grafana-apikey";
 
 # --------------------------------------------------------------------------
 # SYSTEM ENV VARS: required for docker-compose
@@ -299,21 +300,54 @@ then
         --rm -it nouchka/sqlite3 /grafana.db 'DELETE FROM `dashboard_provisioning` WHERE id>0;';
     # add random api token directly from SQL into sqlite (required for grafana-reports, grafana-reverse-proxy)
     # note: same operation can be done using CURL with the grafana api, but would still require user credentials to make the requests!
+
     echo "------------------------------------------------------------";
-    # TODO: random generate the API_KEY_DB+API_TOKEN (understand the releation between both)
-    API_KEY_DB="a8a4d0b05f3c8b9c7edbaac876828947ac09f11ac1d5fae0ff42d2b914619103e0b40fdd210fa1a1399d4b92c263b04020b6";
-    API_TOKEN="eyJrIjoiVzU0UUVpOGdWWmZiTXpac3lreVNIV2R0UnE4TjlSMFIiLCJuIjoicmVwb3J0ZXIiLCJpZCI6MX0=";
-    echo "GRAFANA_API_TOKEN=$API_TOKEN";
-    echo "------------------------------------------------------------";
-    docker run \
-        --volume "$PWD/grafana/data/grafana.db:/grafana.db" \
-        --rm -it nouchka/sqlite3 /grafana.db 'DELETE FROM `api_key` WHERE _rowid_ IN ("1");';
-    docker run \
-        --volume "$PWD/grafana/data/grafana.db:/grafana.db" \
-        --rm -it nouchka/sqlite3 /grafana.db 'INSERT INTO "api_key"("org_id","name","key","role","created","updated") VALUES (1,"reporter","'$API_KEY_DB'","Viewer","2019-05-01 12:00:00","2019-05-01 12:00:00");';
-    # replace nginx.conf proxy_pass authorization header
-    echo "update 'grafana-reverse-proxy' nginx configuration file with new api token: ./grafana-proxy/conf/nginx.conf";
-    sed -i 's/.*proxy_set_header Authorization "Bearer.*/            proxy_set_header Authorization "Bearer '$API_TOKEN'";/' ./grafana-proxy/conf/nginx.conf;
+    GENERATE_API_KEY=0;
+    if [[ -f $GRAFANA_APIKEY_TOKEN ]]
+    then
+        echo "Grafana apikey + token already exists, skipping apikey-generator: $GRAFANA_APIKEY_TOKEN";
+        source $GRAFANA_APIKEY_TOKEN;
+        echo "------------------------------------------------------------";
+        echo "Test grafana api with the following command:";
+        echo "curl -H \"Authorization: Bearer ${ClientSecret}\" http://localhost:3000/api/dashboards/home";
+        echo "------------------------------------------------------------";
+
+    else
+        GENERATE_API_KEY=1;
+    fi
+
+    if [[ $GENERATE_API_KEY -eq 1 ]]
+    then
+        # build grafana apikey-generator docker container from local sourcode
+        (cd grafana/apikey-generator && docker build -t grafana-apikey-generator .);
+        # generate api-key
+        API_KEY_TOKEN=$(docker run \
+            --name smartplug-grafana-apikey-generator \
+            --rm grafana-apikey-generator:latest 1 "reports");
+        if [[ "$?" != "0" ]]
+        then
+            echo "Grafana ket-generator ERROR!";
+            exit $RETURN_ERROR;
+        fi
+        echo "------------------------------------------------------------";
+        echo "$API_KEY_TOKEN" | sed -e 's/ /\n/' > $GRAFANA_APIKEY_TOKEN;
+        cat $GRAFANA_APIKEY_TOKEN;
+        source $GRAFANA_APIKEY_TOKEN;
+        echo "------------------------------------------------------------";
+        docker run \
+            --volume "$PWD/grafana/data/grafana.db:/grafana.db" \
+            --rm -it nouchka/sqlite3 /grafana.db 'DELETE FROM `api_key` WHERE _rowid_ IN ("1");';
+        docker run \
+            --volume "$PWD/grafana/data/grafana.db:/grafana.db" \
+            --rm -it nouchka/sqlite3 /grafana.db 'INSERT INTO "api_key"("org_id","name","key","role","created","updated") VALUES (1,"reports","'$HashedKey'","Viewer","2019-05-01 12:00:00","2019-05-01 12:00:00");';
+        # replace nginx.conf proxy_pass authorization header
+        echo "update 'grafana-reverse-proxy' nginx configuration file with new api token: ./grafana-proxy/conf/nginx.conf";
+        sed -i 's/.*proxy_set_header Authorization "Bearer.*/            proxy_set_header Authorization "Bearer '$ClientSecret'";/' ./grafana-proxy/conf/nginx.conf;
+        echo "------------------------------------------------------------";
+        echo "Test grafana api with the following command:";
+        echo "curl -H \"Authorization: Bearer ${ClientSecret}\" http://localhost:3000/api/dashboards/home";
+        echo "------------------------------------------------------------";
+    fi
 fi
 
 # initialize

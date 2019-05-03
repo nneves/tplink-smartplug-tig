@@ -1,0 +1,7 @@
+apikey-generator
+env/*
+env/.*
+env/env.grafana-apikey
+Dockerfile
+.gitignore
+.dockerignore
