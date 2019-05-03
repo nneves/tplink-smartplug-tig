@@ -77,6 +77,10 @@ services:
       - /usr/local/bin/grafana-reporter
       - -ip
       - "grafana-reverse-proxy:3003"
+      - -templates
+      - /var/tex
+    volumes:
+      - "$PWD/grafana-reporter/templates:/var/tex"
     ports:
       - "127.0.0.1:8686:8686"
     depends_on:
