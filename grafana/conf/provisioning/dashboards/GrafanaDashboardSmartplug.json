@@ -16,12 +16,12 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1556813805894,
+  "iteration": 1556896101974,
   "links": [
     {
       "icon": "doc",
-      "includeVars": false,
-      "keepTime": false,
+      "includeVars": true,
+      "keepTime": true,
       "tags": [],
       "targetBlank": true,
       "title": "SmartPlug Report",
@@ -281,7 +281,7 @@
       "renderer": "flot",
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1556813805894,
+      "repeatIteration": 1556896101974,
       "repeatPanelId": 2,
       "scopedVars": {
         "devices": {
@@ -475,7 +475,7 @@
       "renderer": "flot",
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1556813805894,
+      "repeatIteration": 1556896101974,
       "repeatPanelId": 2,
       "scopedVars": {
         "devices": {
@@ -669,7 +669,7 @@
       "renderer": "flot",
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1556813805894,
+      "repeatIteration": 1556896101974,
       "repeatPanelId": 2,
       "scopedVars": {
         "devices": {
@@ -1040,7 +1040,7 @@
       "renderer": "flot",
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1556813805894,
+      "repeatIteration": 1556896101974,
       "repeatPanelId": 5,
       "scopedVars": {
         "devices": {
@@ -1210,7 +1210,7 @@
       "renderer": "flot",
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1556813805894,
+      "repeatIteration": 1556896101974,
       "repeatPanelId": 5,
       "scopedVars": {
         "devices": {
@@ -1380,7 +1380,7 @@
       "renderer": "flot",
       "repeat": null,
       "repeatDirection": "h",
-      "repeatIteration": 1556813805894,
+      "repeatIteration": 1556896101974,
       "repeatPanelId": 5,
       "scopedVars": {
         "devices": {
@@ -1510,7 +1510,7 @@
       }
     }
   ],
-  "refresh": "10s",
+  "refresh": "1m",
   "schemaVersion": 16,
   "style": "dark",
   "tags": [],
@@ -1544,7 +1544,7 @@
     ]
   },
   "time": {
-    "from": "now-3h",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {
@@ -1575,5 +1575,5 @@
   "timezone": "",
   "title": "SmartPlug",
   "uid": "r7LagJ_mz",
-  "version": 16
+  "version": 2
 }
